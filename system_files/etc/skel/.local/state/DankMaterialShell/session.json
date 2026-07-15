@@ -1,0 +1,38 @@
+{
+  "isLightMode": false,
+  "doNotDisturb": false,
+  "terminalOverride": "ghostty",
+  "wallpaperPath": "/usr/share/backgrounds/rakuos/default.jpg",
+  "perMonitorWallpaper": false,
+  "monitorWallpaperFillModes": {},
+  "wallpaperTransition": "iris bloom",
+  "includedTransitions": [
+    "fade",
+    "wipe",
+    "disc",
+    "stripes",
+    "iris bloom",
+    "pixelate",
+    "portal"
+  ],
+  "wallpaperCyclingEnabled": false,
+  "nightModeEnabled": false,
+  "themeModeAutoEnabled": false,
+  "themeModeShareGammaSettings": false,
+  "dockLauncherPosition": 0,
+  "hiddenTrayIds": [
+    "mate-polkit",
+    "blueman::Bluetooth Disabled",
+    "blueman::Bluetooth Enabled",
+    "dank-calendar::Dank Calendar"
+  ],
+  "showThirdPartyPlugins": true,
+  "pluginBrowserInstalledFirst": true,
+  "weatherHourlyDetailed": true,
+  "searchAppActions": true,
+  "launcherLastMode": "all",
+  "launcherLastFileSearchType": "all",
+  "appDrawerLastMode": "apps",
+  "niriOverviewLastMode": "apps",
+  "configVersion": 3
+}

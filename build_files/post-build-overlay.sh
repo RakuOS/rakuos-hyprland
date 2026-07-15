@@ -168,10 +168,13 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   nautilus
   gvfs
   gvfs-mtp
+  cups-pk-helper
+  tuned
+  tuned-ppd
   cava
   wl-clipboard
   matugen
-  quickshell
+  quickshell-git
   wtype
   qt6ct-kde
   wl-mirror

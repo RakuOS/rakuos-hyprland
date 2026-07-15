@@ -5,6 +5,7 @@ set -ouex pipefail
 FEDORA_VERSION=$(rpm -E %fedora)
 
 ## Install packages
+# FIXME: Remove quickshell-git when Fedora gets 0.3 version
 dnf5.real -y install \
   niri \
   dms \
@@ -24,6 +25,9 @@ dnf5.real -y install \
   ibus-mozc \
   ibus-unikey \
   nautilus \
+  cups-pk-helper \
+  tuned \
+  tuned-ppd \
   gvfs \
   gvfs-mtp \
   cava \
