@@ -54,6 +54,7 @@ window-rule {
     match title="Steam"
     match app-id="org.gnome.gitlab.somas.Apostrophe"
     match app-id="CurseForge"
+    open-floating false
     default-column-width { fixed 1188; }
 }
 
