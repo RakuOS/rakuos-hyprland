@@ -144,55 +144,56 @@ sed -i -e '$a\' "$PACKAGES_LIST"
 echo "[rakuos] stale overlay state cleared — prebake will write fresh first-boot state."
 echo "[rakuos] Post-build seed complete."
 
-echo "Appending GNOME protected packages to protected-packages.txt..."
+echo "Appending niri protected packages to protected-packages.txt..."
 cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
 
-# GNOME DE packages (from rakuos-gnome/build_files/build.sh)
-  gdm
-  gnome-session
-  gnome-shell
-  gnome-settings-daemon
-  gnome-backgrounds
-  gnome-control-center
+# Niri packages (from rakuos-niri/build_files/build.sh)
+  niri
+  dms
+  dankcalendar-git
+  danksearch
+  dgop
+  dms-greeter
+  nm-connection-editor
+  pavucontrol
+  ddcutil
+  adw-gtk3-theme
+  file-roller
+  fprintd-pam
+  gnome-calculator
+  gnome-disk-utility
+  gvfs-nfs
+  ibus-mozc
+  ibus-unikey
+  nautilus
+  gvfs
+  gvfs-mtp
+  gvfs-wsdd
+  cava
+  wl-clipboard
+  matugen
+  quickshell
+  wtype
+  qt6ct-kde
+  wl-mirror
+  libnotify
+  blueman
+  gnome-keyring
+  xwayland-satellite
   NetworkManager-adsl
   NetworkManager-bluetooth
-  NetworkManager-openconnect-gnome
-  NetworkManager-openvpn-gnome
   NetworkManager-ppp
-  NetworkManager-ssh-gnome
-  NetworkManager-vpnc-gnome
   NetworkManager-wwan
-  gnome-bluetooth
-  systemd-oomd-defaults
-  fprintd-pam
   pipewire
+  ghostty
+  rakuos-software-gtk
+  rakuos-welcome-gtk
+  systemd-oomd-defaults
   wireplumber
   xdg-desktop-portal
   xdg-desktop-portal-gnome
   xdg-desktop-portal-gtk
   xdg-user-dirs-gtk
-  gnome-shell-extension-appindicator
-  gnome-shell-extension-no-overview
-  gnome-shell-extension-dash-to-dock
-  gnome-shell-extension-blur-my-shell
-  rakuos-welcome-gtk
-  gnome-calculator
-  gnome-calendar
-  ptyxis
-  gnome-disk-utility
-  nautilus
-  evince
-  loupe
-  gnome-tweaks
-  gnome-text-editor
-  gnome-system-monitor
-  file-roller
-  adw-gtk3-theme
-  gvfs-nfs
-  ibus-mozc
-  ibus-unikey
-  papers
-  rakuos-software-gtk
 EOF
 dnf5.real -y remove selinux-policy\* selinux-policy-targeted selinux-policy-devel policycoreutils-gui
 dnf5.real -y install libselinux
@@ -208,5 +209,5 @@ fi
 echo "Generating base file manifest..."
 /usr/libexec/rakuos/generate-base-manifest
 
-echo "Prebaking GNOME overlay payload..."
+echo "Prebaking niri overlay payload..."
 prebake_overlay_from_installroot

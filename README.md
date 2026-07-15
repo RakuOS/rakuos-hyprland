@@ -1,3 +1,3 @@
-# rakuos-gnome
+# rakuos-niri
 
-This repo holds and builds the GNOME RakuOS Atomic cloud native images
+This repo holds and builds the Niri RakuOS Atomic cloud native images
