@@ -1,4 +1,4 @@
-This repo builds the RakuOS GNOME image.
+This repo builds the RakuOS Niri image.
 
 Scope:
 - GNOME packages

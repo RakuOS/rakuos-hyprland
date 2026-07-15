@@ -26,7 +26,6 @@ dnf5.real -y install \
   nautilus \
   gvfs \
   gvfs-mtp \
-  gvfs-wsdd \
   cava \
   wl-clipboard \
   matugen \

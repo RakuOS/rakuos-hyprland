@@ -168,7 +168,6 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   nautilus
   gvfs
   gvfs-mtp
-  gvfs-wsdd
   cava
   wl-clipboard
   matugen
