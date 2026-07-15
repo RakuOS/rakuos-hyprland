@@ -14,13 +14,13 @@ workflow:
     - when: never
 
 variables:
-  IMAGE_REGISTRY: "registry.gitlab.com/rakuos/images/rakuos-gnome"
-  IMAGE_REGISTRY_NVIDIA: "registry.gitlab.com/rakuos/images/rakuos-gnome/nvidia"
-  IMAGE_REGISTRY_QUAY: "quay.io/rakuos/rakuos-gnome"
-  IMAGE_REGISTRY_QUAY_NVIDIA: "quay.io/rakuos/rakuos-gnome-nvidia"
+  IMAGE_REGISTRY: "registry.gitlab.com/rakuos/images/rakuos-niri"
+  IMAGE_REGISTRY_NVIDIA: "registry.gitlab.com/rakuos/images/rakuos-niri/nvidia"
+  IMAGE_REGISTRY_QUAY: "quay.io/rakuos/rakuos-niri"
+  IMAGE_REGISTRY_QUAY_NVIDIA: "quay.io/rakuos/rakuos-niri-nvidia"
   DEFAULT_TAG: "latest"
-  IMAGE_DESC: "RakuOS GNOME"
-  IMAGE_KEYWORDS: "bootc,fedora,atomic,gnome"
+  IMAGE_DESC: "RakuOS Niri"
+  IMAGE_KEYWORDS: "bootc,fedora,atomic,niri"
 
 stages:
   - build
