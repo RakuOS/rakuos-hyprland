@@ -29,7 +29,7 @@ dnf5.real -y install \
   cava \
   wl-clipboard \
   matugen \
-  quickshell \
+  quickshell-0.3.0-1.fc44 \
   wtype \
   qt6ct-kde \
   wl-mirror \
@@ -51,6 +51,8 @@ dnf5.real -y install \
   xdg-desktop-portal-gnome \
   xdg-desktop-portal-gtk \
   xdg-user-dirs-gtk
+
+dnf5.real -y remove waybar swaylock alacritty fuzzel
 
 ## Enable Services
 systemctl enable greetd
