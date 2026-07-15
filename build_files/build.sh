@@ -29,7 +29,7 @@ dnf5.real -y install \
   cava \
   wl-clipboard \
   matugen \
-  quickshell-0.3.0-1.fc44 \
+  quickshell-git \
   wtype \
   qt6ct-kde \
   wl-mirror \
