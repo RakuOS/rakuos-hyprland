@@ -1,5 +1,5 @@
 {
-  "currentThemeName": "custom",
+  "currentThemeName": "dynamic",
   "currentThemeCategory": "dynamic",
   "matugenScheme": "scheme-vibrant",
   "matugenContrast": 0,
@@ -276,7 +276,7 @@
   "useAutoLocation": true,
   "weatherEnabled": true,
   "networkPreference": "wifi",
-  "iconTheme": "Adwaita",
+  "iconTheme": "WhiteSur",
   "cursorSettings": {
     "theme": "System Default",
     "size": 24,

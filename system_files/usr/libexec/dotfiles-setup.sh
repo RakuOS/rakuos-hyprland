@@ -7,7 +7,5 @@ if [ -f "$FIRSTRUN" ]; then
 fi
 
 cp -r "/etc/skel/." "$HOME"
-dms ipc theme dark
-dms ipc wallpaper set /usr/share/backgrounds/rakuos/default.jpg
 
 touch "$FIRSTRUN"
