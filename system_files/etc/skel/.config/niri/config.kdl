@@ -2,6 +2,7 @@
 // "/-" comments out the following node.
 // Check the wiki for a full description of the configuration:
 // https://niri-wm.github.io/niri/Configuration%3A-Introduction.html
+include "/usr/share/niri/global.kdl"
 include "dms/binds.kdl"
 include "dms/outputs.kdl"
 include "dms/windowrules.kdl"
@@ -11,9 +12,12 @@ include optional=true "windowrules.kdl"
 include optional=true "touchscreen.kdl"
 include optional=true "workspaces.kdl"
 
-config-notification {
-    disable-failed
+environment {
+    TERMINAL "ghostty"
 }
+
+prefer-no-csd
+screenshot-path "~/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 gestures {
 }
@@ -83,11 +87,6 @@ layout {
       urgent-color "red"
     }
 }
-layer-rule {
-    // match namespace="^quickshell$"
-    match namespace="dms:blurwallpaper"
-    place-within-backdrop true
-}
 
 overview {
     workspace-shadow {
@@ -95,23 +94,6 @@ overview {
     }
 }
 
-spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
-spawn-at-startup "/usr/libexec/polkit-mate-authentication-agent-1"
-
-environment {
-  XDG_CURRENT_DESKTOP "niri"
-  QT_QPA_PLATFORM "wayland"
-  ELECTRON_OZONE_PLATFORM_HINT "auto"
-  QT_QPA_PLATFORMTHEME "gtk3"
-  QT_QPA_PLATFORMTHEME_QT6 "gtk3"
-  TERMINAL "ghostty"
-}
-
-hotkey-overlay {
-    skip-at-startup
-}
-prefer-no-csd
-screenshot-path "~/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
     workspace-switch {
         spring damping-ratio=0.80 stiffness=523 epsilon=0.0001
@@ -154,8 +136,4 @@ recent-windows {
         max-height 450
         max-scale 0.5
     }
-}
-
-debug {
-    honor-xdg-activation-with-invalid-serial
 }

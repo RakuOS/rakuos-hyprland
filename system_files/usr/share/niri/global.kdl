@@ -1,0 +1,32 @@
+// This config is in the KDL format: https://kdl.dev
+// System configuration
+// If you want to change these, copy this file to your home folder
+// and remove import in your config.kdl
+
+spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
+
+environment {
+  XDG_CURRENT_DESKTOP "niri"
+  QT_QPA_PLATFORM "wayland"
+  ELECTRON_OZONE_PLATFORM_HINT "auto"
+  QT_QPA_PLATFORMTHEME "gtk3"
+  QT_QPA_PLATFORMTHEME_QT6 "gtk3"
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+config-notification {
+    disable-failed
+}
+
+layer-rule {
+    // match namespace="^quickshell$"
+    match namespace="dms:blurwallpaper"
+    place-within-backdrop true
+}
+
+debug {
+    honor-xdg-activation-with-invalid-serial
+}

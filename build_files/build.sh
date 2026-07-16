@@ -60,4 +60,5 @@ dnf5.real -y remove waybar swaylock alacritty fuzzel
 
 ## Enable Services
 systemctl enable greetd
+systemctl enable --global dotfiles-setup
 systemctl enable --global dsearch dms
