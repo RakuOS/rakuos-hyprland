@@ -11,7 +11,6 @@ window-rule {
     match app-id="Spotify"
     match app-id="spotify"
     match app-id="vesktop"
-    match app-id="firefox"
     match app-id="GDevelop 5"
     match app-id="discord"
     match app-id="Godot"
@@ -34,13 +33,6 @@ window-rule {
     open-floating true
 }
 
-// @id=dms_rule_3 @name=GTK apps
-window-rule {
-    match app-id="^org\\.gnome\\."
-    geometry-corner-radius 12
-    clip-to-geometry true
-}
-
 // @id=dms_rule_4 @name=Settings
 window-rule {
     match app-id="^gnome-control-center$"
@@ -51,39 +43,10 @@ window-rule {
 
 // @id=dms_rule_5 @name=Wider-collums
 window-rule {
-    match title="Steam"
     match app-id="org.gnome.gitlab.somas.Apostrophe"
     match app-id="CurseForge"
     open-floating false
     default-column-width { fixed 1188; }
-}
-
-// @id=dms_rule_6 @name=Steam sign in
-window-rule {
-    match title="Steam is not configured!"
-    match title="Sign in to Steam"
-    open-floating true
-}
-
-// @id=dms_rule_7 @name=Terminals
-window-rule {
-    match app-id="^org\\.wezfurlong\\.wezterm$"
-    match app-id="Alacritty"
-    match app-id="zen"
-    match app-id="com.mitchellh.ghostty"
-    match app-id="kitty"
-}
-
-// @id=dms_rule_8 @name=Unactive windows
-window-rule {
-    match is-active=false
-    opacity 0.90
-}
-
-// @id=dms_rule_9 @name=Technical
-window-rule {
-    geometry-corner-radius 12
-    clip-to-geometry true
 }
 
 // @id=dms_rule_12 @name=Gnome weather
@@ -98,7 +61,7 @@ window-rule {
 // @id=dms_rule_13 @name=Picture in Picture
 window-rule {
     match app-id="firefox$" title="^Picture-in-Picture$"
-    match app-id="org.garudalinux.firedragon" title="Obraz v obraze"
+    match app-id="org.garudalinux.firedragon" title="^Picture-in-Picture$"
     match app-id="zoom"
     open-floating true
     default-column-width { fixed 480; }
