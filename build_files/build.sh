@@ -49,7 +49,6 @@ dnf5.real -y install \
   ghostty \
   rakuos-software-gtk \
   rakuos-welcome-gtk \
-  scx-manager \
   systemd-oomd-defaults \
   wireplumber \
   xdg-desktop-portal \

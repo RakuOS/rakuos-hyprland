@@ -190,7 +190,6 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   ghostty
   rakuos-software-gtk
   rakuos-welcome-gtk
-  scx-manager
   systemd-oomd-defaults
   wireplumber
   xdg-desktop-portal
