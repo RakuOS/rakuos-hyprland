@@ -618,7 +618,47 @@ cleanup-temp-tags:
       when: always
     - if: '$CI_COMMIT_BRANCH == "staging"'
       when: always
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+      when: always
     - if: '$CI_COMMIT_BRANCH == "rawhide"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+      when: always
+
+notify-discord:
+  stage: dispatch
+  image: curlimages/curl:latest
+  needs:
+    - job: sign-image-standard
+      optional: true
+    - job: sign-image-nvidia
+      optional: true
+  script:
+    - |
+      set -euo pipefail
+      : "${RAKURPM_TOKEN:?set RAKURPM_TOKEN in CI/CD variables}"
+      : "${RAKURPM_IP:?set RAKURPM_IP in CI/CD variables}"
+      ADMIN="${RAKURPM_ADMIN_PREFIX:-/backend}"
+      DATE_TAG="$(date -u +%Y%m%d)"
+
+      case "${CI_COMMIT_BRANCH}" in
+        "${CI_DEFAULT_BRANCH}") CHANNEL="main"; PRIMARY_TAG_NAME="${DEFAULT_TAG}" ;;
+        "staging")              CHANNEL="staging"; PRIMARY_TAG_NAME="staging"     ;;
+        "rakuosel")             CHANNEL="main"; PRIMARY_TAG_NAME="rakuosel"       ;;
+        *) echo "No Discord channel configured for branch '${CI_COMMIT_BRANCH}', skipping."; exit 0 ;;
+      esac
+
+      curl -k -sf -X POST \
+        -H "Authorization: Bearer ${RAKURPM_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"channel\": \"${CHANNEL}\", \"name\": \"rakuos-niri\", \"version\": \"${PRIMARY_TAG_NAME}.${DATE_TAG}\"}" \
+        "https://${RAKURPM_IP}${ADMIN}/api/image-update"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "staging"'
       when: always
     - if: '$CI_COMMIT_BRANCH == "rakuosel"'
       when: always
