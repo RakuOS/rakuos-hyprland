@@ -30,6 +30,7 @@ window-rule {
     match app-id="spacefin-welcome"
     match app-id="^xdg-desktop-portal$"
     match app-id="gsr-ui"
+    match app-id="org.rakuos.Installer.Gtk"
     open-floating true
 }
 
