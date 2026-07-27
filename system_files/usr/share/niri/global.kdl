@@ -2,6 +2,9 @@
 // System configuration
 // If you want to change these, copy this file to your home folder
 // and remove import in your config.kdl
+//
+// This configuration is separate from user config because changing any
+// of these can breake things!
 
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 
@@ -45,7 +48,16 @@ window-rule {
     match app-id="kitty"
     draw-border-with-background false
 }
-
+window-rule {
+    match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+    open-floating true
+    default-floating-position x=0 y=0 relative-to="bottom-right"
+    geometry-corner-radius 0
+    open-focused false
+    focus-ring {
+         off
+    }
+}
 window-rule {
     match is-active=false
     opacity 0.90
