@@ -188,6 +188,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   NetworkManager-wwan
   pipewire
   ghostty
+  rakuos-release-niri
   rakuos-software-gtk
   rakuos-welcome-gtk
   systemd-oomd-defaults
