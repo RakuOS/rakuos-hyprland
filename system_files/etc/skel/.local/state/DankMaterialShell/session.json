@@ -2,7 +2,7 @@
   "isLightMode": false,
   "doNotDisturb": false,
   "terminalOverride": "ghostty",
-  "wallpaperPath": "/usr/share/wallpapers/RakuOS-Creation/contents/images/3840x2160.jpg",
+  "wallpaperPath": "/usr/share/wallpapers/RakuOS-Creation/contents/images/3840x2160.png",
   "perMonitorWallpaper": false,
   "monitorWallpaperFillModes": {},
   "wallpaperTransition": "iris bloom",
