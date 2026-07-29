@@ -276,7 +276,8 @@
   "useAutoLocation": true,
   "weatherEnabled": true,
   "networkPreference": "wifi",
-  "iconTheme": "WhiteSur",
+  "iconThemeDark": "WhiteSur",
+  "iconThemeLight": "WhiteSur",
   "cursorSettings": {
     "theme": "System Default",
     "size": 24,

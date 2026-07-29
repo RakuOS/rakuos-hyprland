@@ -47,6 +47,7 @@ dnf5.real -y install \
   NetworkManager-wwan \
   pipewire \
   ghostty \
+  rakuos-release-niri \
   rakuos-software-gtk \
   rakuos-welcome-gtk \
   systemd-oomd-defaults \
