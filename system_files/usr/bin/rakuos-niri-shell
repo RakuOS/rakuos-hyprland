@@ -93,7 +93,7 @@ case "$COMMAND" in
             echo "Keybinds weren't change so you may want to check your config"
         fi
         if [[ "$LEFT_NOCTALIA" == "true" ]]; then
-            echo "Note: Noctalia was not remove (only disabled) because your account doesn't have administrator (sudo) access."
+            echo "Note: Noctalia was not removed (only disabled) because your account doesn't have administrator (sudo) access."
         fi
         ;;
     "noctalia"):
@@ -116,7 +116,7 @@ case "$COMMAND" in
         echo "Your shell was disabled."
         echo "Note: keybinds weren't changed"
         if [[ "$LEFT_NOCTALIA" == "true" ]]; then
-            echo "Note: Noctalia was not remove (only disabled) because your account doesn't have administrator (sudo) access."
+            echo "Note: Noctalia was not removed (only disabled) because your account doesn't have administrator (sudo) access."
         fi
         ;;
     ""|"--help"|"help"|"*"):
