@@ -59,6 +59,15 @@ dnf5.real -y install \
 
 dnf5.real -y remove waybar swaylock alacritty fuzzel
 
+## Remove fedora wallpapers
+rm -r /usr/share/backgrounds/fedora-workstation/
+
+## Fix default applications
+sed -i \
+  -e '/text\/plain=org\.gnome\.gedit\.desktop/d' \
+  -e 's|application/pdf=org\.gnome\.Evince\.desktop|application/pdf=org.mozilla.firefox.desktop|g' \
+  /usr/share/applications/mimeapps.list
+
 ## Enable Services
 systemctl enable greetd
 systemctl enable --global dotfiles-setup
