@@ -2,7 +2,7 @@
   "isLightMode": false,
   "doNotDisturb": false,
   "terminalOverride": "ghostty",
-  "wallpaperPath": "/usr/share/wallpapers/RakuOS-Creation/contents/images/3840x2160.png",
+  "wallpaperPath": "/usr/share/backgrounds/rakuos/RakuOS-Creation.png",
   "perMonitorWallpaper": false,
   "monitorWallpaperFillModes": {},
   "wallpaperTransition": "iris bloom",
@@ -24,8 +24,7 @@
     "mate-polkit",
     "blueman::Bluetooth Disabled",
     "blueman::Bluetooth Enabled",
-    "dank-calendar::Dank Calendar",
-    "org.rakuos.Software::RakuOS Software"
+    "dank-calendar::Dank Calendar"
   ],
   "showThirdPartyPlugins": true,
   "pluginBrowserInstalledFirst": true,

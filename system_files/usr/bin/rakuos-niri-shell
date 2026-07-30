@@ -2,12 +2,14 @@
 
 ## DankMaterialShell
 install_dms() {
+    systemctl unmask --user dsearch dms
     systemctl enable --user dsearch dms
     systemctl start --user dsearch dms
 }
 rm_dms() {
     systemctl stop --user dsearch dms
     systemctl disable --user dsearch dms
+    systemctl mask --user dsearch dms
 }
 dms_keybinds() {
     BINDS_FILE="$HOME/.config/niri/dms/binds.kdl"
@@ -19,7 +21,12 @@ dms_keybinds() {
 ## Noctalia
 install_noctalia() {
     if [ ! -f /usr/bin/noctalia ]; then
-        sudo rakupkg install noctalia -y
+        if ! id -nG "$USER" | grep -qw "wheel"; then
+            echo "You'll need to be on account with administrator (sudo) privilages to install software."
+            exit 1
+        else
+            sudo rakupkg install noctalia -y
+        fi
     fi
     printf '\nspawn-at-startup "noctalia"\n' >> ~/.config/niri/config.kdl
     noctalia --daemon
@@ -27,7 +34,12 @@ install_noctalia() {
 rm_noctalia() {
     sed -i '/spawn-at-startup "noctalia"/d' ~/.config/niri/config.kdl
     killall noctalia
-    sudo rakupkg remove noctalia -y
+    if ! id -nG "$USER" | grep -qw "wheel"; then
+        LEFT_NOCTALIA=true
+        exit 1
+    else
+        sudo rakupkg remove noctalia -y
+    fi
 }
 noctalia_keybinds() {
     BINDS_FILE="$HOME/.config/niri/dms/binds.kdl"
@@ -80,6 +92,9 @@ case "$COMMAND" in
         else
             echo "Keybinds weren't change so you may want to check your config"
         fi
+        if [[ "$LEFT_NOCTALIA" == "true" ]]; then
+            echo "Note: Noctalia was not remove (only disabled) because your account doesn't have administrator (sudo) access."
+        fi
         ;;
     "noctalia"):
         rm_all noctalia
@@ -100,6 +115,9 @@ case "$COMMAND" in
         echo ""
         echo "Your shell was disabled."
         echo "Note: keybinds weren't changed"
+        if [[ "$LEFT_NOCTALIA" == "true" ]]; then
+            echo "Note: Noctalia was not remove (only disabled) because your account doesn't have administrator (sudo) access."
+        fi
         ;;
     ""|"--help"|"help"|"*"):
         echo "Usage: rakuos-niri-shell <dms|noctalia|none> <options>"
