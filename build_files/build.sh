@@ -65,6 +65,9 @@ rm -r /usr/share/backgrounds/fedora-workstation/
 ## Fix default applications
 sed -i \
   -e '/text\/plain=org\.gnome\.gedit\.desktop/d' \
+  -e '/org\.gnome\.eog\.desktop/d' \
+  -e '/org\.gnome\.Totem\.desktop/d' \
+  -e '/org\.gnome\.Rhythmbox3\.desktop/d' \
   -e 's|application/pdf=org\.gnome\.Evince\.desktop|application/pdf=org.mozilla.firefox.desktop|g' \
   /usr/share/applications/mimeapps.list
 

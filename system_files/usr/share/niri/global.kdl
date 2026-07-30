@@ -29,6 +29,10 @@ layer-rule {
     match namespace="dms:blurwallpaper"
     place-within-backdrop true
 }
+layer-rule {
+  match namespace="^noctalia-backdrop"
+  place-within-backdrop true
+}
 
 debug {
     honor-xdg-activation-with-invalid-serial
@@ -47,6 +51,12 @@ window-rule {
     match app-id="com.mitchellh.ghostty"
     match app-id="kitty"
     draw-border-with-background false
+}
+window-rule {
+  match app-id="dev.noctalia.Noctalia"
+  open-floating true
+  default-column-width { fixed 1080; }
+  default-window-height { fixed 920; }
 }
 window-rule {
     match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#

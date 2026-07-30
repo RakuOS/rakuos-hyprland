@@ -1,0 +1,117 @@
+#!/bin/bash
+
+## DankMaterialShell
+install_dms() {
+    systemctl enable --user dsearch dms
+    systemctl start --user dsearch dms
+}
+rm_dms() {
+    systemctl stop --user dsearch dms
+    systemctl disable --user dsearch dms
+}
+dms_keybinds() {
+    BINDS_FILE="$HOME/.config/niri/dms/binds.kdl"
+    BINDS_BACKUP="$HOME/.config/niri/dms/binds.kdl.backup"
+    mv "$BINDS_FILE" "$BINDS_BACKUP"
+    cp /etc/skel/.config/niri/dms/binds.kdl "$BINDS_FILE"
+}
+
+## Noctalia
+install_noctalia() {
+    if [ ! -f /usr/bin/noctalia ]; then
+        sudo rakupkg install noctalia -y
+    fi
+    printf '\nspawn-at-startup "noctalia"\n' >> ~/.config/niri/config.kdl
+    noctalia --daemon
+}
+rm_noctalia() {
+    sed -i '/spawn-at-startup "noctalia"/d' ~/.config/niri/config.kdl
+    killall noctalia
+    sudo rakupkg remove noctalia -y
+}
+noctalia_keybinds() {
+    BINDS_FILE="$HOME/.config/niri/dms/binds.kdl"
+    BINDS_BACKUP="$HOME/.config/niri/dms/binds.kdl.backup"
+    mv "$BINDS_FILE" "$BINDS_BACKUP"
+    cp /usr/share/niri/templates/noctalia-binds.kdl "$BINDS_FILE"
+}
+
+## All Shells
+rm_all() {
+    if systemctl --user is-active --quiet dms && [ "$1" != "dms" ]; then
+        rm_dms
+    fi
+
+    if pgrep -x "noctalia" > /dev/null && [ "$1" != "noctalia" ]; then
+        rm_noctalia
+    fi
+}
+
+current_shell() {
+    if systemctl --user is-active --quiet dms; then
+        echo "Current shell: DankMaterialShell"
+    elif pgrep -x "noctalia" > /dev/null; then
+        echo "Current shell: Noctalia"
+    else
+        echo "Current shell: none/unknown"
+    fi
+}
+
+## Main logic
+COMMAND="$1"
+shift
+
+case "$1" in
+    "--skip-keybinds") KEYBINDS=false ;;
+    "*") KEYBINDS=true ;;
+esac
+
+case "$COMMAND" in
+    "dms")
+        rm_all dms
+        install_dms
+        if $KEYBINDS; then
+            dms_keybinds
+        fi
+        echo ""
+        echo "DankMaterialShell was set as your shell."
+        if $KEYBINDS; then
+            echo "All keybinds were set automatically for you"
+        else
+            echo "Keybinds weren't change so you may want to check your config"
+        fi
+        ;;
+    "noctalia"):
+        rm_all noctalia
+        install_noctalia
+        if $KEYBINDS; then
+            noctalia_keybinds
+        fi
+        echo ""
+        echo "Noctalia v5 was set as your shell."
+        if $KEYBINDS; then
+            echo "Basic keybinds were set automatically for you"
+        else
+            echo "Keybinds weren't change so you may want to check your config"
+        fi
+        ;;
+    "none"):
+        rm_all
+        echo ""
+        echo "Your shell was disabled."
+        echo "Note: keybinds weren't changed"
+        ;;
+    ""|"--help"|"help"|"*"):
+        echo "Usage: rakuos-niri-shell <dms|noctalia|none> <options>"
+        echo ""
+        current_shell
+        echo ""
+        echo "Avaible:"
+        echo "  dms"
+        echo "  noctalia"
+        echo "  none"
+        echo ""
+        echo "Options:"
+        echo "--skip-keybinds     don't change keybind config"
+        ;;
+esac
