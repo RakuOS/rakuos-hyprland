@@ -71,6 +71,7 @@ current_shell() {
 
 ## Main logic
 COMMAND="$1"
+KEYBINDS=true
 shift
 
 case "$1" in
@@ -130,6 +131,6 @@ case "$COMMAND" in
         echo "  none"
         echo ""
         echo "Options:"
-        echo "--skip-keybinds     don't change keybind config"
+        echo "  --skip-keybinds     don't change keybind config"
         ;;
 esac
