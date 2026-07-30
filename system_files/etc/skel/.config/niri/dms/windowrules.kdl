@@ -34,7 +34,7 @@ window-rule {
     open-floating true
 }
 
-// @id=dms_rule_4 @name=Settings
+// @id=dms_rule_3 @name=Settings
 window-rule {
     match app-id="^gnome-control-center$"
     match app-id="^pavucontrol$"
@@ -42,7 +42,7 @@ window-rule {
     default-column-width { proportion 0.5; }
 }
 
-// @id=dms_rule_5 @name=Wider-collums
+// @id=dms_rule_4 @name=Wider-collums
 window-rule {
     match app-id="org.gnome.gitlab.somas.Apostrophe"
     match app-id="CurseForge"
@@ -50,7 +50,14 @@ window-rule {
     default-column-width { fixed 1188; }
 }
 
-// @id=dms_rule_12 @name=Gnome weather
+// @id=dms_rule_5 @name=RakuOS software fix
+window-rule {
+    match app-id="org.rakuos.Software"
+    open-floating false
+    default-column-width { fixed 1060; }
+}
+
+// @id=dms_rule_6 @name=Gnome weather
 window-rule {
     match app-id="org.gnome.Weather"
     open-floating true
@@ -59,12 +66,15 @@ window-rule {
     default-floating-position x=32 y=32 relative-to="top-right"
 }
 
-// @id=dms_rule_13 @name=Picture in Picture
+// @id=dms_rule_7 @name=Picture in Picture
 window-rule {
     match app-id="firefox$" title="^Picture-in-Picture$"
     match app-id="org.garudalinux.firedragon" title="^Picture-in-Picture$"
+    match app-id="app.zen_browser.zen" title="^Picture-in-Picture$"
+    match app-id="one.ablaze.floorp" title="^Picture-in-Picture$"
     match app-id="zoom"
     open-floating true
     default-column-width { fixed 480; }
     default-window-height { fixed 270; }
+    default-floating-position x=32 y=32 relative-to="bottom-right"
 }
