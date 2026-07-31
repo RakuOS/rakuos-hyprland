@@ -42,7 +42,6 @@ rm_noctalia() {
     killall noctalia
     if ! id -nG "$USER" | grep -qw "wheel"; then
         LEFT_NOCTALIA=true
-        exit 1
     else
         if [[ $REMOVE == true ]]; then
             sudo rakupkg remove noctalia -y
