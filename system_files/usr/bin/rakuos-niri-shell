@@ -1,5 +1,11 @@
 #!/bin/bash
 
+## sudo check
+if [ "$EUID" -eq 0 ]; then
+    echo "This script must NOT be ran as root!"
+    exit 1
+fi
+
 ## DankMaterialShell
 install_dms() {
     systemctl unmask --user dsearch dms
@@ -38,7 +44,9 @@ rm_noctalia() {
         LEFT_NOCTALIA=true
         exit 1
     else
-        sudo rakupkg remove noctalia -y
+        if [[ $REMOVE == true ]]; then
+            sudo rakupkg remove noctalia -y
+        fi
     fi
 }
 noctalia_keybinds() {
@@ -70,14 +78,23 @@ current_shell() {
 }
 
 ## Main logic
-COMMAND="$1"
 KEYBINDS=true
-shift
+REMOVE=true
 
-case "$1" in
-    "--skip-keybinds") KEYBINDS=false ;;
-    "*") KEYBINDS=true ;;
-esac
+while [[ "$1" =~ ^- ]]; do
+    case "$1" in
+        "--skip-keybinds") KEYBINDS=false ;;
+        "--skip-remove") REMOVE=false ;;
+        "--help") ;;
+        *)
+            echo "Unknown option $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+COMMAND="$1"
 
 case "$COMMAND" in
     "dms")
@@ -121,7 +138,7 @@ case "$COMMAND" in
         fi
         ;;
     ""|"--help"|"help"|"*"):
-        echo "Usage: rakuos-niri-shell <dms|noctalia|none> <options>"
+        echo "Usage: rakuos-niri-shell <options> <dms|noctalia|none>"
         echo ""
         current_shell
         echo ""
@@ -132,5 +149,7 @@ case "$COMMAND" in
         echo ""
         echo "Options:"
         echo "  --skip-keybinds     don't change keybind config"
+        echo "  --skip-remove       don't remove shell from system - only disable"
+        echo "                        this works only for noctalia"
         ;;
 esac
