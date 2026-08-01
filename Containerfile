@@ -14,6 +14,10 @@ COPY build_files /
 FROM ${BASE_IMAGE_REPO}:${BASE_IMAGE_TAG} AS builder
 ARG BASE_IMAGE_TAG
 ENV BASE_IMAGE_TAG=${BASE_IMAGE_TAG}
+# Set by CI to "1" on the staging branch so build.sh installs the
+# rakuos-release-<de>-staging variant instead of rakuos-release-<de>.
+ARG RAKUOS_STAGING="0"
+ENV RAKUOS_STAGING=${RAKUOS_STAGING}
 COPY system_files /
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
