@@ -47,6 +47,3 @@ gtk-single-instance = true
 
 # Dank color generation
 theme = dankcolors
-
-command = /bin/fish
-shell-integration = fish
