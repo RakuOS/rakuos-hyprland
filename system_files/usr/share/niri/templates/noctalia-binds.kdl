@@ -1,24 +1,38 @@
 binds {
-    // Core Noctalia binds
+    // === Core Noctalia Binds ===
     Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
     Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
-    Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
+    Mod+Shift+S { spawn-sh "noctalia msg settings-toggle"; }
+    Mod+N { spawn-sh "noctalia msg panel-toggle control-center notifications"; }
+    Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
+    Mod+E { spawn-sh "noctalia msg panel-toggle session"; }
+    Mod+Y { spawn-sh "noctalia msg panel-toggle wallpaper"; }
+    Ctrl+Alt+Delete { spawn-sh "noctalia msg panel-toggle control-center system"; }
+    Mod+Ctrl+M { spawn-sh "noctalia msg panel-toggle control-center system"; }
+    Mod+Ctrl+D { spawn-sh "noctalia msg dock-toggle"; }
     Mod+Tab repeat=false { toggle-overview; }
 
-    // Audio & Brightness
+    // === Audio & Brightness ===
     XF86AudioRaiseVolume { spawn-sh "noctalia msg volume-up"; }
     XF86AudioLowerVolume { spawn-sh "noctalia msg volume-down"; }
     XF86AudioMute { spawn-sh "noctalia msg volume-mute"; }
     XF86MonBrightnessUp { spawn-sh "noctalia msg brightness-up"; }
     XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
 
-    // Apps
+    // === Apps ===
     Mod+F hotkey-overlay-title="Open File Manager" { spawn "nautilus"; }
     Mod+Shift+C hotkey-overlay-title="Open Niri Config" { spawn-sh "xdg-open ~/.config/niri/config.kdl"; }
-    Mod+Shift+S hotkey-overlay-title="Open Niri Config" { spawn-sh "xdg-open ~/.config/niri/config.kdl"; }
     Mod+Shift+D hotkey-overlay-title="Open Defaults Config" { spawn-sh "xdg-open ~/.config/mimeapps.list"; }
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "ghostty"; }
     Mod+B hotkey-overlay-title="Open Browser" { spawn-sh "xdg-open about:newtab"; }
+    Mod+Shift+A hotkey-overlay-title="Open Window Rules Config" { spawn-sh "xdg-open ~/.config/niri/windowrules.kdl"; }
+    Mod+Shift+W hotkey-overlay-title="Open Workspace Config" { spawn-sh "xdg-open ~/.config/niri/workspaces.kdl"; }
+    Mod+comma hotkey-overlay-title="Open RakuOS Docs" { spawn-sh "xdg-open https://rakuos.org/documentation"; }
+    Mod+question hotkey-overlay-title="Open RakuOS Docs" { spawn-sh "xdg-open https://rakuos.org/documentation"; }
+    Mod+Ctrl+Alt+M hotkey-overlay-title="Open Resources" { spawn-sh "flatpak run net.nokyan.Resources"; }
+    Mod+Ctrl+Shift+M hotkey-overlay-title="Open Resources" { spawn-sh "flatpak run net.nokyan.Resources"; }
+    XF86Calculator hotkey-overlay-title="Open Calculator" { spawn-sh "flatpak run org.gnome.Calculator"; }
+    XF86Mail hotkey-overlay-title="Open Mail" { spawn-sh "xdg-open https://mail.proton.me"; }
 
     // === Window Management ===
     Mod+Q repeat=false { close-window; }
@@ -29,6 +43,7 @@ binds {
     Mod+G { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
     Mod+W { toggle-column-tabbed-display; }
+    Mod+D hotkey-overlay-title="Open Overview" { toggle-overview; }
 
     // === Focus Navigation ===
     Mod+Left  { focus-column-left; }
@@ -58,7 +73,6 @@ binds {
     Mod+End  { focus-column-last; }
     Mod+Ctrl+Home { move-column-to-first; }
     Mod+Ctrl+End  { move-column-to-last; }
-
 
     // === Monitor Navigation ===
     Mod+Ctrl+H     { focus-monitor-left; }
@@ -182,4 +196,8 @@ binds {
     // === System Controls ===
     Mod+Ctrl+Escape { power-off-monitors; }
     Mod+Shift+Escape { spawn "loginctl" "lock-session"; }
+    Mod+Escape hotkey-overlay-title="Supend" { spawn "systemctl" "suspend" "-i"; }
+    Mod+Shift+E { quit; }
+    Mod+Shift+K { show-hotkey-overlay; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
 }
