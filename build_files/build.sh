@@ -68,6 +68,9 @@ sed -i \
   -e 's|application/pdf=org\.gnome\.Evince\.desktop|application/pdf=org.mozilla.firefox.desktop|g' \
   /usr/share/applications/mimeapps.list
 
+## Unlock keyring on login
+sed -i -E 's/^-([a-z]+[[:space:]]+.*pam_gnome_keyring\.so)/\1/' /etc/pam.d/greetd
+
 ## Enable Services
 systemctl enable greetd
 systemctl enable --global dotfiles-setup
