@@ -1471,6 +1471,8 @@ notify-discord:
       optional: true
     - job: sign-image-nvidia-v3
       optional: true
+    - job: cleanup-temp-tags
+      optional: true
   script:
     - |
       set -euo pipefail
