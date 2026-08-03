@@ -276,10 +276,10 @@
   "useAutoLocation": true,
   "weatherEnabled": true,
   "networkPreference": "wifi",
-  "iconThemeDark": "WhiteSur",
+  "iconThemeDark": "WhiteSur-dark",
   "iconThemeLight": "WhiteSur",
   "cursorSettings": {
-    "theme": "System Default",
+    "theme": "Bibata-Modern-Classic",
     "size": 24,
     "niri": {
       "hideWhenTyping": false,

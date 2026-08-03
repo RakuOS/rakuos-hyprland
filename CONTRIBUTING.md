@@ -1,8 +1,8 @@
 This repo builds the RakuOS Niri image.
 
 Scope:
-- GNOME packages
-- Extensions
+- Niri/DankMaterialShell packages
+- Dotfiles
 - Default settings
 - ISO configuration
 

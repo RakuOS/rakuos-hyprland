@@ -4,6 +4,14 @@ set -ouex pipefail
 
 FEDORA_VERSION=$(rpm -E %fedora)
 
+# On the staging branch (RAKUOS_STAGING=1, set via --build-arg from CI)
+# install the staging os-release identity instead of the stable one, so
+# staging images identify themselves as "RakuOS NIRI Staging".
+RAKUOS_RELEASE_PKG="rakuos-release-niri"
+if [ "${RAKUOS_STAGING:-0}" = "1" ]; then
+    RAKUOS_RELEASE_PKG="rakuos-release-niri-staging"
+fi
+
 ## Install packages
 # FIXME: Remove quickshell-git when Fedora gets 0.3 version
 dnf5.real -y install \
@@ -47,7 +55,7 @@ dnf5.real -y install \
   NetworkManager-wwan \
   pipewire \
   ghostty \
-  rakuos-release-niri \
+  ${RAKUOS_RELEASE_PKG} \
   rakuos-software-gtk \
   rakuos-welcome-gtk \
   systemd-oomd-defaults \
@@ -65,6 +73,9 @@ rm -r /usr/share/backgrounds/fedora-workstation/
 ## Fix default applications
 sed -i \
   -e '/text\/plain=org\.gnome\.gedit\.desktop/d' \
+  -e '/org\.gnome\.eog\.desktop/d' \
+  -e '/org\.gnome\.Totem\.desktop/d' \
+  -e '/org\.gnome\.Rhythmbox3\.desktop/d' \
   -e 's|application/pdf=org\.gnome\.Evince\.desktop|application/pdf=org.mozilla.firefox.desktop|g' \
   /usr/share/applications/mimeapps.list
 

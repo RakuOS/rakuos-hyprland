@@ -62,7 +62,15 @@ stages:
           ;;
       esac
       export BASE_IMAGE_TAG="${BRANCH_SLUG}"
+      # Passed to build.sh as RAKUOS_STAGING via --build-arg so it
+      # installs the rakuos-release-<de>-staging variant on staging.
+      if [ "${CI_COMMIT_BRANCH}" = "staging" ]; then
+        export RAKUOS_STAGING="1"
+      else
+        export RAKUOS_STAGING="0"
+      fi
       echo "Using branch slug: ${BRANCH_SLUG}"
+      echo "RAKUOS_STAGING=${RAKUOS_STAGING}"
       echo "Pulling base image tag: ${BASE_IMAGE_TAG}"
     - export DATE_TAG="$(date -u +%Y%m%d)"
   variables:
@@ -88,6 +96,7 @@ build-base:
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -136,6 +145,7 @@ build-nvidia:
       buildah build \
         --file Containerfile.nvidia \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -268,6 +278,7 @@ build-base-v4:
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_V4}" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
@@ -317,6 +328,7 @@ build-base-v3:
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_V3}" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
@@ -366,6 +378,7 @@ build-nvidia-v4:
       buildah build \
         --file Containerfile.nvidia \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_V4}" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
@@ -415,6 +428,7 @@ build-nvidia-v3:
       buildah build \
         --file Containerfile.nvidia \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_V3}" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
@@ -1456,6 +1470,8 @@ notify-discord:
     - job: sign-image-nvidia-v4
       optional: true
     - job: sign-image-nvidia-v3
+      optional: true
+    - job: cleanup-temp-tags
       optional: true
   script:
     - |
