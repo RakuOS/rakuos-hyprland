@@ -181,6 +181,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   libnotify
   blueman
   gnome-keyring
+  gnome-keyring-pam
   xwayland-satellite
   NetworkManager-adsl
   NetworkManager-bluetooth
