@@ -48,6 +48,7 @@ dnf5.real -y install \
   libnotify \
   blueman \
   gnome-keyring \
+  gnome-keyring-pam \
   xwayland-satellite \
   NetworkManager-adsl \
   NetworkManager-bluetooth \
