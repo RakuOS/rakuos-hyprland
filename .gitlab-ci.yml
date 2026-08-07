@@ -1487,11 +1487,12 @@ notify-discord:
         *) echo "No Discord channel configured for branch '${CI_COMMIT_BRANCH}', skipping."; exit 0 ;;
       esac
 
-      curl -k -sf -X POST \
-        -H "Authorization: Bearer ${WEBSITE_CI_API_TOKEN}" \
-        -H "Content-Type: application/json" \
-        -d "{\"channel\": \"${CHANNEL}\", \"name\": \"rakuos-niri\", \"version\": \"${PRIMARY_TAG_NAME}.${DATE_TAG}\"}" \
-        "https://${WEBSITE_HOST}/api/image-update"
+      PAYLOAD="{\"channel\": \"${CHANNEL}\", \"name\": \"rakuos-niri\", \"version\": \"${PRIMARY_TAG_NAME}.${DATE_TAG}\"}"
+      DISCORD_CURL_ARGS=(-k -sf -X POST -H "Authorization: Bearer ${WEBSITE_CI_API_TOKEN}" -H "Content-Type: application/json" -d "${PAYLOAD}")
+      if ! curl "${DISCORD_CURL_ARGS[@]}" "https://${WEBSITE_HOST}/api/image-update"; then
+        echo "HTTPS request to ${WEBSITE_HOST} failed, falling back to plain HTTP on :8080..."
+        curl "${DISCORD_CURL_ARGS[@]}" "http://${WEBSITE_HOST}:8080/api/image-update"
+      fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
