@@ -1476,9 +1476,8 @@ notify-discord:
   script:
     - |
       set -euo pipefail
-      : "${RAKURPM_TOKEN:?set RAKURPM_TOKEN in CI/CD variables}"
-      : "${RAKURPM_IP:?set RAKURPM_IP in CI/CD variables}"
-      ADMIN="${RAKURPM_ADMIN_PREFIX:-/backend}"
+      : "${WEBSITE_CI_API_TOKEN:?set WEBSITE_CI_API_TOKEN in CI/CD variables}"
+      : "${WEBSITE_HOST:?set WEBSITE_HOST in CI/CD variables}"
       DATE_TAG="$(date -u +%Y%m%d)"
 
       case "${CI_COMMIT_BRANCH}" in
@@ -1489,10 +1488,10 @@ notify-discord:
       esac
 
       curl -k -sf -X POST \
-        -H "Authorization: Bearer ${RAKURPM_TOKEN}" \
+        -H "Authorization: Bearer ${WEBSITE_CI_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d "{\"channel\": \"${CHANNEL}\", \"name\": \"rakuos-niri\", \"version\": \"${PRIMARY_TAG_NAME}.${DATE_TAG}\"}" \
-        "https://${RAKURPM_IP}${ADMIN}/api/image-update"
+        "https://${WEBSITE_HOST}/api/image-update"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
