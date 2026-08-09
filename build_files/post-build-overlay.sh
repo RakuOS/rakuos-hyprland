@@ -21,40 +21,19 @@
 set -euo pipefail
 
 DEFAULT_PACKAGES_LIST="/usr/share/rakuos/packages.list"
-Dnf_CONF="/usr/share/rakuos/dnf.conf"
 FACTORY_VAR_ROOT="/usr/share/factory/var"
 PACKAGES_LIST="$FACTORY_VAR_ROOT/lib/rakuos/packages.list"
 UPPER_DIR="$FACTORY_VAR_ROOT/lib/rakuos/overlay/upper"
 WORK_DIR="$FACTORY_VAR_ROOT/lib/rakuos/overlay/work"
 STATE_FILE="$FACTORY_VAR_ROOT/lib/rakuos/overlay.state"
 DIRTY_FILE="$FACTORY_VAR_ROOT/lib/rakuos/overlay.dirty"
-PKG_CACHE_DIR="$FACTORY_VAR_ROOT/cache/libdnf5"
-PKGCACHE_MIGRATED="$FACTORY_VAR_ROOT/lib/rakuos/pkgcache.migrated"
-BASE_RPM_DB="/usr/share/rpm"
-IMAGE_PACKAGES_TOML="/usr/lib/sysimage/libdnf5/packages.toml"
+FACTORY_RUM_RPMDB="$FACTORY_VAR_ROOT/lib/rakuos/rum-rpmdb"
 
 echo "[rakuos] Seeding overlay state for first-boot install..."
 
 prebake_overlay_from_installroot() {
-    local dnf_conf="/usr/share/rakuos/dnf.conf"
-    local releasever=""
     local installroot
     local -a prebake_packages=()
-
-    if [[ ! -f "$dnf_conf" ]]; then
-        echo "[rakuos] WARNING: Missing $dnf_conf; skipping overlay prebake."
-        return 0
-    fi
-
-    if [[ -f /etc/os-release ]]; then
-        # shellcheck disable=SC1091
-        . /etc/os-release
-        releasever="${VERSION_ID:-}"
-    fi
-    if [[ -z "$releasever" ]]; then
-        echo "[rakuos] WARNING: Could not determine releasever; skipping overlay prebake."
-        return 0
-    fi
 
     mapfile -t prebake_packages < <(
         grep -v '^\s*#' "$PACKAGES_LIST" \
@@ -73,44 +52,33 @@ prebake_overlay_from_installroot() {
     installroot="$(mktemp -d /var/tmp/rakuos-overlay-installroot.XXXXXX)"
     trap 'rm -rf "$installroot"' RETURN
 
-    echo "[rakuos] Prebaking overlay packages into installroot..."
-    mkdir -p "$installroot/var/cache/libdnf5"
-    mkdir -p "$installroot/usr/share/rpm"
-    cp -a "$BASE_RPM_DB/." "$installroot/usr/share/rpm/"
-    rm -f "$installroot/usr/share/rpm"/.rpm.lock "$installroot/usr/share/rpm"/__db.*
-    if [[ -f "$IMAGE_PACKAGES_TOML" ]]; then
-        mkdir -p "$installroot/usr/lib/sysimage/libdnf5"
-        cp -a "$IMAGE_PACKAGES_TOML" "$installroot/usr/lib/sysimage/libdnf5/packages.toml"
-    fi
+    echo "[rakuos] Prebaking overlay packages into installroot via rum..."
+    # No base rpmdb snapshot exists yet inside a build container, so rum's
+    # OverlayPaths::detect() picks Standalone and resolves "already
+    # installed" against the build container's own default rpmdb — exactly
+    # the base image content this layer is being built on top of. --installroot
+    # still redirects package files under $installroot/usr and creates a
+    # fresh, disposable overlay rpmdb at $installroot/var/lib/rakuos/rum-rpmdb,
+    # applying --nodeps/tsflags=noscripts automatically.
+    rum install --installroot "$installroot" -y --refresh "${prebake_packages[@]}"
 
-    dnf5.real --config="$dnf_conf" \
-        --use-host-config \
-        --installroot="$installroot" \
-        --releasever="$releasever" \
-        --setopt=keepcache=1 \
-        --setopt=cachedir="$installroot/var/cache/libdnf5" \
-        --setopt=tsflags=noscripts \
-        install -y --refresh "${prebake_packages[@]}"
+    rm -f "$installroot/usr/share/icons/default/index.theme"
 
     echo "[rakuos] Copying prebaked /usr payload into overlay upper..."
-    rm -rf "$UPPER_DIR" "$WORK_DIR" "$PKG_CACHE_DIR"
-    mkdir -p "$UPPER_DIR" "$WORK_DIR" "$PKG_CACHE_DIR"
+    rm -rf "$UPPER_DIR" "$WORK_DIR"
+    mkdir -p "$UPPER_DIR" "$WORK_DIR"
     cp -a "$installroot/usr/." "$UPPER_DIR/"
-    mkdir -p "$UPPER_DIR/share/rpm"
-    cp -a "$installroot/usr/share/rpm/." "$UPPER_DIR/share/rpm/"
-    rm -f "$UPPER_DIR/share/rpm"/.rpm.lock "$UPPER_DIR/share/rpm"/__db.*
+
+    echo "[rakuos] Copying prebaked rum overlay rpmdb into factory seed..."
+    rm -rf "$FACTORY_RUM_RPMDB"
+    mkdir -p "$(dirname "$FACTORY_RUM_RPMDB")"
+    cp -a "$installroot/var/lib/rakuos/rum-rpmdb" "$FACTORY_RUM_RPMDB"
 
     if [[ -d "$installroot/etc" ]] && [[ -n "$(ls -A "$installroot/etc" 2>/dev/null)" ]]; then
         echo "[rakuos] Copying prebaked /etc payload into image..."
         cp -a "$installroot/etc/." /etc/
     fi
 
-    if [[ -d "$installroot/var/cache/libdnf5" ]] && [[ -n "$(ls -A "$installroot/var/cache/libdnf5" 2>/dev/null)" ]]; then
-        echo "[rakuos] Copying libdnf5 cache into image..."
-        cp -a "$installroot/var/cache/libdnf5/." "$PKG_CACHE_DIR/"
-    fi
-
-    touch "$PKGCACHE_MIGRATED"
     echo "prebaked-installroot" > "$STATE_FILE"
     rm -f "$DIRTY_FILE"
 
