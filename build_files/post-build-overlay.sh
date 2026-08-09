@@ -167,7 +167,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   xdg-desktop-portal-gtk
   xdg-user-dirs-gtk
 EOF
-rum remove -y $(rpm -qa --qf '%{NAME}\n' 'selinux-policy*' 'policycoreutils-gui')
+rum remove -y 'selinux-policy*' 'policycoreutils-gui'
 rum install -y libselinux
 
 # selinux-policy is fully removed on RakuOS (AppArmor is the sole MAC), but the
