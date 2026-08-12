@@ -56,6 +56,7 @@ rum install -y \
   NetworkManager-wwan \
   pipewire \
   ghostty \
+  ghostty-nautilus \
   ${RAKUOS_RELEASE_PKG} \
   rakuos-software-gtk \
   rakuos-welcome-gtk \

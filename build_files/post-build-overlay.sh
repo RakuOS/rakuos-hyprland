@@ -157,6 +157,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   NetworkManager-wwan
   pipewire
   ghostty
+  ghostty-nautilus
   rakuos-release-niri
   rakuos-software-gtk
   rakuos-welcome-gtk
