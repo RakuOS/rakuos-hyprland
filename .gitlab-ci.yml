@@ -1488,7 +1488,7 @@ notify-discord:
       esac
 
       PAYLOAD="{\"channel\": \"${CHANNEL}\", \"name\": \"rakuos-niri\", \"version\": \"${PRIMARY_TAG_NAME}.${DATE_TAG}\"}"
-      curl -k -sS -f -X POST -H "Authorization: Bearer ${WEBSITE_CI_API_TOKEN}" -H "Content-Type: application/json" -d "${PAYLOAD}" "https://${WEBSITE_HOST}/api/image-update"
+      curl -sS -f -X POST -H "Authorization: Bearer ${WEBSITE_CI_API_TOKEN}" -H "Content-Type: application/json" -d "${PAYLOAD}" "http://${WEBSITE_HOST}:8080/api/image-update"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
