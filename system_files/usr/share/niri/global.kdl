@@ -40,7 +40,6 @@ debug {
 
 window-rule {
     match app-id="^org\\.gnome\\."
-    geometry-corner-radius 12
     clip-to-geometry true
 }
 
