@@ -25,14 +25,19 @@ dms_keybinds() {
 }
 
 ## Noctalia
-install_noctalia() {
+check_noctalia() {
     if [ ! -f /usr/bin/noctalia ]; then
         if ! id -nG "$USER" | grep -qw "wheel"; then
             echo "You'll need to be on account with administrator (sudo) privilages to install software."
             exit 1
         else
-            sudo rakupkg install noctalia -y
+            INSTALL_NOCTALIA=true
         fi
+    fi
+}
+install_noctalia() {
+    if [[ $INSTALL_NOCTALIA ]]; then
+        sudo rakupkg install noctalia -y
     fi
     printf '\nspawn-at-startup "noctalia"\n' >> ~/.config/niri/config.kdl
     noctalia --daemon
@@ -114,6 +119,7 @@ case "$COMMAND" in
         fi
         ;;
     "noctalia"):
+        check_noctalia
         rm_all noctalia
         install_noctalia
         if $KEYBINDS; then
