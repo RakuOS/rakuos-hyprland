@@ -14,7 +14,7 @@ fi
 
 ## Install packages
 # FIXME: Remove quickshell-git when Fedora gets 0.3 version
-dnf5.real -y install \
+rum install -y \
   niri \
   dms \
   dankcalendar-git \
@@ -56,6 +56,7 @@ dnf5.real -y install \
   NetworkManager-wwan \
   pipewire \
   ghostty \
+  ghostty-nautilus \
   ${RAKUOS_RELEASE_PKG} \
   rakuos-software-gtk \
   rakuos-welcome-gtk \
@@ -66,7 +67,7 @@ dnf5.real -y install \
   xdg-desktop-portal-gtk \
   xdg-user-dirs-gtk
 
-dnf5.real -y remove waybar swaylock alacritty fuzzel
+rum remove -y waybar swaylock alacritty fuzzel
 
 ## Remove fedora wallpapers
 rm -r /usr/share/backgrounds/fedora-workstation/
