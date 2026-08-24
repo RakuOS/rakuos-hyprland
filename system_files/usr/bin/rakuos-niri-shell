@@ -37,7 +37,7 @@ check_noctalia() {
 }
 install_noctalia() {
     if [[ $INSTALL_NOCTALIA ]]; then
-        sudo rakupkg install noctalia -y
+        sudo rum install noctalia -y
     fi
     printf '\nspawn-at-startup "noctalia"\n' >> ~/.config/niri/config.kdl
     noctalia --daemon
@@ -49,7 +49,7 @@ rm_noctalia() {
         LEFT_NOCTALIA=true
     else
         if [[ $REMOVE == true ]]; then
-            sudo rakupkg remove noctalia -y
+            sudo rum remove noctalia -y
         fi
     fi
 }
