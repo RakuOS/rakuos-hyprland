@@ -24,13 +24,6 @@ gestures {
 }
 
 input {
-    keyboard {
-        xkb {
-        }
-        numlock
-    }
-    trackpoint {
-    }
     focus-follows-mouse
     warp-mouse-to-focus
 }
