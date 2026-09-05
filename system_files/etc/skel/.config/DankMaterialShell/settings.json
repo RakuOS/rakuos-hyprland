@@ -278,6 +278,7 @@
   "networkPreference": "wifi",
   "iconThemeDark": "WhiteSur-dark",
   "iconThemeLight": "WhiteSur",
+  "iconThemePerMode": true,
   "cursorSettings": {
     "theme": "Bibata-Modern-Classic",
     "size": 24,
