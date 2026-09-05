@@ -1,0 +1,6 @@
+#!/bin/bash
+# Temporary for testing
+
+sudo rum install noctalia-greeter
+sudo sed -i 's/command = "dms-greeter --command niri"/command = "noctalia-greeter-session"/g' /etc/greetd/config.toml
+sudo systemctl restart greetd
