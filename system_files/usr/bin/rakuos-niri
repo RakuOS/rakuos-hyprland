@@ -1,0 +1,21 @@
+#!/bin/bash
+
+COMMAND="$1"
+shift
+
+case "$COMMAND" in
+    "shell")
+        /usr/bin/libexec/rakuos-niri-shell "$@"
+        ;;
+    "greeter"):
+        /usr/bin/libexec/rakuos-niri-greeter "$@"
+        ;;
+    ""|"--help"|"help"|"*"):
+        echo "RakuOS Niri helper"
+        echo ""
+        echo "Usage:"
+        echo "  shell       switch wayland shells"
+        echo "  greeter     switch greetd greeters"
+        echo ""
+        ;;
+esac

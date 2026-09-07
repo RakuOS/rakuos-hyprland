@@ -1,0 +1,24 @@
+#!/bin/bash
+
+case "$COMMAND" in
+    "dms")
+        sudo rum remove noctalia-greeter
+        sudo sed -i 's/command = "noctalia-greeter-session"/command = "dms-greeter --command niri"/g' /etc/greetd/config.toml
+        sudo systemctl restart greetd
+        ;;
+    "noctalia"):
+        sudo rum install noctalia-greeter
+        sudo sed -i 's/command = "dms-greeter --command niri"/command = "noctalia-greeter-session"/g' /etc/greetd/config.toml
+        sudo systemctl restart greetd
+        ;;
+    ""|"--help"|"help"|"*"):
+        echo "Usage: rakuos-niri greeter <options> <dms|noctalia>"
+        echo ""
+        echo "Avaible:"
+        echo "  dms"
+        echo "  noctalia"
+        echo ""
+        echo "Note: use dms only if you switched to noctalia and want to switch back"
+        echo ""
+        ;;
+esac
