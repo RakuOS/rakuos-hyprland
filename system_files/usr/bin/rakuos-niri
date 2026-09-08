@@ -5,10 +5,10 @@ shift
 
 case "$COMMAND" in
     "shell")
-        /usr/bin/libexec/rakuos-niri-shell "$@"
+        /usr/libexec/rakuos-niri-shell "$@"
         ;;
     "greeter"):
-        /usr/bin/libexec/rakuos-niri-greeter "$@"
+        /usr/libexec/rakuos-niri-greeter "$@"
         ;;
     ""|"--help"|"help"|"*"):
         echo "RakuOS Niri helper"

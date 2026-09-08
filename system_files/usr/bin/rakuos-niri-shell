@@ -4,4 +4,4 @@
 echo "This command will be removed in future, please use 'rakuos-niri shell' instead"
 echo ""
 
-/usr/bin/libexec/rakuos-niri-shell "$@"
+/usr/libexec/rakuos-niri-shell "$@"
