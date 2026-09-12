@@ -3,7 +3,7 @@ COMMAND="$1"
 
 _confirm() {
     echo ""
-    echo "⚠️  Switching greeters will log you out and change system settings."
+    echo "⚠️  Switching greeters will change system settings."
     echo "    Only continue if you know what you are doing!"
     read -p "Do you want to continue? (y/n): " -n 1 -r
     echo ""
@@ -18,14 +18,17 @@ case "$COMMAND" in
     "dms")
         _confirm
         sudo rum remove noctalia-greeter
-        sudo sed -i 's/command = "noctalia-greeter-session"/command = "dms-greeter --command niri"/g' /etc/greetd/config.toml
-        sudo systemctl restart greetd
+        sudo sed -i 's/^command = .*/command = "dms-greeter --command niri"/' /etc/greetd/config.tomls
+        dms-greeter sync
+        echo ""
+        echo "Greeter changed, please reboot"
         ;;
     "noctalia"):
         _confirm
         sudo rum install noctalia-greeter
-        sudo sed -i 's/command = "dms-greeter --command niri"/command = "noctalia-greeter-session"/g' /etc/greetd/config.toml
-        sudo systemctl restart greetd
+        sudo sed -i 's/^command = .*/command = "noctalia-greeter-session"/' /etc/greetd/config.toml
+        echo ""
+        echo "Greeter changed, please reboot"
         ;;
     ""|"--help"|"help"|"*"):
         echo "Usage: rakuos-niri greeter <dms|noctalia>"
