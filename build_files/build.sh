@@ -75,7 +75,7 @@ rum install -y \
 rum remove -y waybar swaylock alacritty fuzzel
 
 ## Remove fedora wallpapers
-rm -r /usr/share/backgrounds/fedora-workstation/
+#rm -r /usr/share/backgrounds/fedora-workstation/
 
 ## Fix default applications
 sed -i \
