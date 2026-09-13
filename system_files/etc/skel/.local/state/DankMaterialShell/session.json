@@ -24,7 +24,8 @@
     "mate-polkit",
     "blueman::Bluetooth Disabled",
     "blueman::Bluetooth Enabled",
-    "dank-calendar::Dank Calendar"
+    "dank-calendar::Dank Calendar",
+    "ibus-ui-gtk3"
   ],
   "showThirdPartyPlugins": true,
   "pluginBrowserInstalledFirst": true,

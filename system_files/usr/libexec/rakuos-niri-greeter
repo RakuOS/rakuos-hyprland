@@ -18,7 +18,7 @@ case "$COMMAND" in
     "dms")
         _confirm
         sudo rum remove noctalia-greeter
-        sudo sed -i 's/^command = .*/command = "dms-greeter --command niri"/' /etc/greetd/config.tomls
+        sudo sed -i 's/^command = .*/command = "dms-greeter --command niri"/' /etc/greetd/config.toml
         dms-greeter sync
         echo ""
         echo "Greeter changed, please reboot"
