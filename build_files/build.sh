@@ -60,6 +60,7 @@ rum install -y \
   NetworkManager-ppp \
   NetworkManager-wwan \
   pipewire \
+  pipewire-pulseaudio \
   ghostty \
   ghostty-nautilus \
   ${RAKUOS_RELEASE_PKG} \
