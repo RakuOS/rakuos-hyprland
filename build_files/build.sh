@@ -60,6 +60,7 @@ rum install -y \
   NetworkManager-ppp \
   NetworkManager-wwan \
   pipewire \
+  pipewire-pulseaudio \
   ghostty \
   ghostty-nautilus \
   ${RAKUOS_RELEASE_PKG} \
@@ -75,7 +76,7 @@ rum install -y \
 rum remove -y waybar swaylock alacritty fuzzel
 
 ## Remove fedora wallpapers
-rm -rf /usr/share/backgrounds/fedora-workstation/
+#rm -r /usr/share/backgrounds/fedora-workstation/
 
 ## Fix default applications
 sed -i \
