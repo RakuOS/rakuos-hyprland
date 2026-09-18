@@ -7,7 +7,7 @@ if [ -f "$FIRSTRUN" ]; then
 fi
 
 cp -r "/etc/skel/." "$HOME"
-gsettings set org.gnome.desktop.interface icon-theme "WhiteSur-dark"
+gsettings set org.gnome.desktop.interface icon-theme "Colloid-Dark"
 dms restart
 
 touch "$FIRSTRUN"

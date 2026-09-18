@@ -276,8 +276,8 @@
   "useAutoLocation": true,
   "weatherEnabled": true,
   "networkPreference": "wifi",
-  "iconThemeDark": "WhiteSur-dark",
-  "iconThemeLight": "WhiteSur",
+  "iconThemeDark": "Colloid-Dark",
+  "iconThemeLight": "Colloid-Light",
   "iconThemePerMode": true,
   "cursorSettings": {
     "theme": "Bibata-Modern-Classic",
