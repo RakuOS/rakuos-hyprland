@@ -66,6 +66,7 @@ rum install -y \
   ${RAKUOS_RELEASE_PKG} \
   rakuos-software-gtk \
   rakuos-welcome-gtk \
+  scx-manager \
   systemd-oomd-defaults \
   wireplumber \
   xdg-desktop-portal \
