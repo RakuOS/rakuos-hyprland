@@ -65,6 +65,7 @@ rum install -y \
   ghostty-nautilus \
   ${RAKUOS_RELEASE_PKG} \
   rakuos-software-gtk \
+  rakuos-system-gtk \
   rakuos-welcome-gtk \
   scx-manager \
   systemd-oomd-defaults \
