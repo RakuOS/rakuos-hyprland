@@ -1,19 +1,19 @@
 #!/bin/bash
 
 FIRSTRUN="$HOME/.local/share/config-setup"
-OLDRUN="$HOME/.local/share/dotfiles-setup"
-
-if [ -f "$OLDRUN" ]; then
-    rm "$OLDRUN"
-fi
+OLDRUN="$HOME/.local/share/dotfiles-setup" # Fixme: Remove when sure everyone updated
 
 if [ -f "$FIRSTRUN" ]; then
     exit 0
 fi
 
-cp -r "/etc/skel/." "$HOME"
-gsettings set org.gnome.desktop.interface icon-theme "Colloid-Dark"
-dms restart
+if [ -f "$OLDRUN" ]; then
+    rm "$OLDRUN"
+else
+    cp -r "/etc/skel/." "$HOME"
+    gsettings set org.gnome.desktop.interface icon-theme "Colloid-Dark"
+    dms restart
+fi
 
 # Fixme: Temporary replace ibus
 ENV_LINE='export GTK_IM_MODULE="simple"'
