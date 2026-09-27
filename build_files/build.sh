@@ -19,6 +19,9 @@ rum config-manager --set-enabled terra
 
 ## Install packages
 # FIXME: Remove quickshell-git when Fedora gets 0.3 version
+# ghostty-kio satisfies ghostty's rich Requires (`ghostty-kio = ... if
+# kf6-kio-core`); without it baked in now, any later kf6-kio-core install
+# (e.g. kde-partitionmanager) fails once Terra is disabled below.
 rum install -y \
   niri \
   dms \
@@ -63,6 +66,7 @@ rum install -y \
   pipewire-pulseaudio \
   ghostty \
   ghostty-nautilus \
+  ghostty-kio \
   ${RAKUOS_RELEASE_PKG} \
   rakuos-software-gtk \
   rakuos-system-gtk \
