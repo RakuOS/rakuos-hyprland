@@ -55,18 +55,23 @@ stages:
       case "${CI_COMMIT_BRANCH}" in
         "${CI_DEFAULT_BRANCH}")
           export BRANCH_SLUG="${DEFAULT_TAG}"
+          export FEDORA_VERSION="44"
           ;;
         "staging")
           export BRANCH_SLUG="staging"
+          export FEDORA_VERSION="44"
           ;;
         "rawhide")
           export BRANCH_SLUG="rawhide"
+          export FEDORA_VERSION="rawhide"
           ;;
         "rakuosel")
           export BRANCH_SLUG="rakuosel"
+          export FEDORA_VERSION="10"
           ;;
         *)
           export BRANCH_SLUG="$(printf '%s' "${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')"
+          export FEDORA_VERSION="45"
           ;;
       esac
       export BASE_IMAGE_TAG="${BRANCH_SLUG}"
@@ -78,6 +83,7 @@ stages:
         export RAKUOS_STAGING="0"
       fi
       echo "Using branch slug: ${BRANCH_SLUG}"
+      echo "Fedora version label: ${FEDORA_VERSION}"
       echo "RAKUOS_STAGING=${RAKUOS_STAGING}"
       echo "Pulling base image tag: ${BASE_IMAGE_TAG}"
     - export DATE_TAG="$(date -u +%Y%m%d)"
@@ -114,6 +120,7 @@ build-base:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -163,6 +170,7 @@ build-nvidia:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -309,6 +317,7 @@ build-base-v4:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -359,6 +368,7 @@ build-base-p03-v4:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -409,6 +419,7 @@ build-base-v3:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -459,6 +470,7 @@ build-base-p03-v3:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -509,6 +521,7 @@ build-nvidia-v4:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -559,6 +572,7 @@ build-nvidia-p03-v4:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -609,6 +623,7 @@ build-nvidia-v3:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
@@ -659,6 +674,7 @@ build-nvidia-p03-v3:
         --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
         --label "org.opencontainers.image.vendor=RakuOS" \
         --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
         --label "containers.bootc=1" \
         --tag "${TEMP_TAG}" \
         .
