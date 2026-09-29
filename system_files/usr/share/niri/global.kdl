@@ -7,7 +7,6 @@
 // of these can breake things!
 
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
-spawn-at-startup "ibus" "start" "--type" "wayland"
 
 environment {
   XDG_CURRENT_DESKTOP "niri"
@@ -15,10 +14,7 @@ environment {
   ELECTRON_OZONE_PLATFORM_HINT "auto"
   QT_QPA_PLATFORMTHEME "gtk3"
   QT_QPA_PLATFORMTHEME_QT6 "gtk3"
-  GTK_IM_MODULE "wayland"
-  XMODIFIERS "@im=ibus"
-  QT_IM_MODULES "wayland;ibus"
-  QT_IM_MODULE "ibus"
+  GTK_IM_MODULE "simple"
 }
 
 hotkey-overlay {

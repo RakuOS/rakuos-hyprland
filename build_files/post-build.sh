@@ -9,3 +9,4 @@ rum config-manager --set-disabled terra
 # Write the DE identifier so rakuos-overlay-mount can detect a DE change at
 # boot and trigger a soft reset to rebuild the overlay from packages.list.
 echo "niri" > /usr/share/rakuos/de-name
+

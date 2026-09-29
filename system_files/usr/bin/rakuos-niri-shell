@@ -1,7 +1,0 @@
-#!/bin/bash
-# Temporary alias
-
-echo "This command will be removed in future, please use 'rakuos-niri shell' instead"
-echo ""
-
-/usr/libexec/rakuos-niri-shell "$@"
