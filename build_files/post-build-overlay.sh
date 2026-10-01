@@ -112,61 +112,84 @@ sed -i -e '$a\' "$PACKAGES_LIST"
 echo "[rakuos] stale overlay state cleared — prebake will write fresh first-boot state."
 echo "[rakuos] Post-build seed complete."
 
-echo "Appending niri protected packages to protected-packages.txt..."
+echo "Appending hyprland protected packages to protected-packages.txt..."
 cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
 
-# Niri packages (from rakuos-niri/build_files/build.sh)
-  niri
-  dms
-  dankcalendar-git
-  danksearch
-  dgop
-  dms-greeter
-  nm-connection-editor
-  pavucontrol
-  ddcutil
-  adw-gtk3-theme
-  file-roller
-  fprintd-pam
-  gnome-calculator
-  gnome-disk-utility
-  gvfs-nfs
-  ibus-mozc
-  ibus-unikey
-  nautilus
-  gvfs
-  gvfs-mtp
-  cups-pk-helper
+# hyprland packages (from rakuos-hyprland/build_files/build.sh)
+  hyprland
+  hyprland-guiutils
+  uwsm
+  noctalia-git
+  noctalia-greeter-git
+  rakuos-welcome-qt
+  rakuos-system-qt
+  rakuos-software-qt
+  ghostty
+  ghostty-nautilus
+  ghostty-kio
+  pipewire
+  pipewire-alsa
+  pipewire-pulseaudio
+  wireplumber
+  cava
+  xdg-desktop-portal
+  xdg-desktop-portal-hyprland
+  xdg-desktop-portal-gtk
+  xdg-user-dirs-gtk
+  xorg-x11-server-Xwayland
+  egl-wayland
+  wl-clipboard
+  grim
+  slurp
+  wtype
   tuned
   tuned-ppd
-  cava
-  wl-clipboard
-  matugen
-  quickshell-git
-  wtype
-  qt6ct-kde
-  wl-mirror
-  libnotify
-  blueman
-  gnome-keyring
-  gnome-keyring-pam
-  xwayland-satellite
+  fprintd-pam
+  adw-gtk3-theme
+  bibata-cursor-theme
+  jetbrainsmono-nerd-fonts
+  gvfs
+  gvfs-mtp
+  gvfs-nfs
+  gvfs-smb
+  nautilus
+  nomacs
+  cups-pk-helper
   NetworkManager-adsl
   NetworkManager-bluetooth
   NetworkManager-ppp
   NetworkManager-wwan
-  pipewire
-  ghostty
-  ghostty-nautilus
-  rakuos-release-niri
+  nm-connection-editor
+  libnotify
+  qt6-qtdeclarative
+  qt6-qt5compat
+  qt6-qtsvg
+  qt6-qtimageformats
+  qt6ct
+  systemd-oomd-defaults
+  chrony
+  swash
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  eza
+  bat
+  fzf
+  zoxide
+  fastfetch
+  starship
+  fastfetch
+  hyprpicker
+  cliphist
+  pavucontrol
+  gnome-calculator
+  gnome-disk-utility
+  tesseract
+  tesseract-langpack-eng
+  tesseract-langpack-ind
+  zbar
+  rakuos-release-hyperland
   rakuos-software-gtk
   rakuos-welcome-gtk
-  systemd-oomd-defaults
-  wireplumber
-  xdg-desktop-portal
-  xdg-desktop-portal-gnome
-  xdg-desktop-portal-gtk
-  xdg-user-dirs-gtk
 EOF
 rum remove -y 'selinux-policy*' 'policycoreutils-gui'
 rum install -y libselinux
@@ -182,5 +205,5 @@ fi
 echo "Generating base file manifest..."
 /usr/libexec/rakuos/generate-base-manifest
 
-echo "Prebaking niri overlay payload..."
+echo "Prebaking hyprland overlay payload..."
 prebake_overlay_from_installroot
