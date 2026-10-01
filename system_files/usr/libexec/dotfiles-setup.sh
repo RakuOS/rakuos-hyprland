@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# First-login populator: copy /etc/skel into $HOME once (mirrors the official
-# RakuOS niri mechanism). The rakuos-installer creates users WITHOUT a full
-# skeleton, so without this, Hyprland's modular config (hyprland.lua ->
-# require("config.*")) never lands in the home and Hyprland falls back to its
-# auto-generated default config.
+# First-login populator: copy /etc/skel into $HOME once. The rakuos-installer
+# creates users WITHOUT a full skeleton, so without this, Hyprland's modular
+# config (hyprland.lua -> require("config.*")) never lands in the home and
+# Hyprland falls back to its auto-generated default config.
 
-# Marker name matches the official RakuOS niri image (~/.local/share/config-setup)
-# so both images behave identically for anyone moving between them.
+# Marker name matches the official RakuOS image (~/.local/share/config-setup)
+# so images behave identically for anyone moving between them.
 FIRSTRUN="$HOME/.local/share/config-setup"
 OLDRUN="$HOME/.local/share/dotfiles-setup"
 
@@ -65,8 +64,7 @@ populate_wallpapers
 ##
 ## Noctalia's own GTK template (assets/templates/gtk/apply.sh) writes gtk-theme
 ## and color-scheme via gsettings but never icon-theme, so nothing else in the
-## session sets this. Same approach as the official CachyOS skel and the RakuOS
-## niri image.
+## session sets this. Same approach as the official CachyOS skel.
 ##
 ## Needs a session bus; the unit is WantedBy=default.target so it starts with
 ## the graphical session. If gsettings is unavailable this is a no-op and the
