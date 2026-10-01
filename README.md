@@ -1,3 +1,3 @@
-# rakuos-niri
+# rakuos-hyprland
 
-This repo holds and builds the Niri RakuOS Atomic cloud native images
+This repo holds and builds the Hyprland RakuOS Atomic cloud native images
