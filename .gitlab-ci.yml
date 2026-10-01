@@ -14,18 +14,18 @@ workflow:
     - when: never
 
 variables:
-  IMAGE_REGISTRY: "registry.gitlab.com/rakuos/images/rakuos-niri"
-  IMAGE_REGISTRY_NVIDIA: "registry.gitlab.com/rakuos/images/rakuos-niri/nvidia"
-  IMAGE_REGISTRY_QUAY: "quay.io/rakuos/rakuos-niri"
-  IMAGE_REGISTRY_QUAY_NVIDIA: "quay.io/rakuos/rakuos-niri-nvidia"
-  IMAGE_REGISTRY_QUAY_V4: "quay.io/rakuos/rakuos-niri-v4"
-  IMAGE_REGISTRY_QUAY_NVIDIA_V4: "quay.io/rakuos/rakuos-niri-nvidia-v4"
-  IMAGE_REGISTRY_QUAY_V3: "quay.io/rakuos/rakuos-niri-v3"
-  IMAGE_REGISTRY_QUAY_NVIDIA_V3: "quay.io/rakuos/rakuos-niri-nvidia-v3"
-  IMAGE_REGISTRY_QUAY_P03_V4: "quay.io/rakuos/rakuos-niri-p03-v4"
-  IMAGE_REGISTRY_QUAY_P03_NVIDIA_V4: "quay.io/rakuos/rakuos-niri-p03-nvidia-v4"
-  IMAGE_REGISTRY_QUAY_P03_V3: "quay.io/rakuos/rakuos-niri-p03-v3"
-  IMAGE_REGISTRY_QUAY_P03_NVIDIA_V3: "quay.io/rakuos/rakuos-niri-p03-nvidia-v3"
+  IMAGE_REGISTRY: "registry.gitlab.com/rakuos/images/rakuos-hyprland"
+  IMAGE_REGISTRY_NVIDIA: "registry.gitlab.com/rakuos/images/rakuos-hyprland/nvidia"
+  IMAGE_REGISTRY_QUAY: "quay.io/rakuos/rakuos-hyprland"
+  IMAGE_REGISTRY_QUAY_NVIDIA: "quay.io/rakuos/rakuos-hyprland-nvidia"
+  IMAGE_REGISTRY_QUAY_V4: "quay.io/rakuos/rakuos-hyprland-v4"
+  IMAGE_REGISTRY_QUAY_NVIDIA_V4: "quay.io/rakuos/rakuos-hyprland-nvidia-v4"
+  IMAGE_REGISTRY_QUAY_V3: "quay.io/rakuos/rakuos-hyprland-v3"
+  IMAGE_REGISTRY_QUAY_NVIDIA_V3: "quay.io/rakuos/rakuos-hyprland-nvidia-v3"
+  IMAGE_REGISTRY_QUAY_P03_V4: "quay.io/rakuos/rakuos-hyprland-p03-v4"
+  IMAGE_REGISTRY_QUAY_P03_NVIDIA_V4: "quay.io/rakuos/rakuos-hyprland-p03-nvidia-v4"
+  IMAGE_REGISTRY_QUAY_P03_V3: "quay.io/rakuos/rakuos-hyprland-p03-v3"
+  IMAGE_REGISTRY_QUAY_P03_NVIDIA_V3: "quay.io/rakuos/rakuos-hyprland-p03-nvidia-v3"
   BASE_IMAGE_REPO_P03_V4: "quay.io/rakuos/rakuos-base-p03-v4"
   BASE_IMAGE_REPO_P03_NVIDIA_V4: "quay.io/rakuos/rakuos-base-p03-nvidia-v4"
   BASE_IMAGE_REPO_P03_V3: "quay.io/rakuos/rakuos-base-p03-v3"
@@ -2340,7 +2340,7 @@ notify-discord:
         *) echo "No Discord channel configured for branch '${CI_COMMIT_BRANCH}', skipping."; exit 0 ;;
       esac
 
-      PAYLOAD="{\"channel\": \"${CHANNEL}\", \"name\": \"rakuos-niri\", \"version\": \"${PRIMARY_TAG_NAME}.${DATE_TAG}\"}"
+      PAYLOAD="{\"channel\": \"${CHANNEL}\", \"name\": \"rakuos-hyprland\", \"version\": \"${PRIMARY_TAG_NAME}.${DATE_TAG}\"}"
       curl -sS -f -X POST -H "Authorization: Bearer ${WEBSITE_CI_API_TOKEN}" -H "Content-Type: application/json" -d "${PAYLOAD}" "http://${WEBSITE_HOST}:8080/api/image-update"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
