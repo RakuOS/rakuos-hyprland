@@ -187,7 +187,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   tesseract-langpack-eng
   tesseract-langpack-ind
   zbar
-  rakuos-release-hyperland
+  rakuos-release-hyprland
   rakuos-software-gtk
   rakuos-welcome-gtk
 EOF

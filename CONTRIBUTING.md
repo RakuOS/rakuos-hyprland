@@ -1,7 +1,7 @@
-This repo builds the RakuOS Niri image.
+This repo builds the RakuOS Hyprland image.
 
 Scope:
-- Niri/DankMaterialShell packages
+- Hyprland/Noctalia packages
 - Dotfiles
 - Default settings
 - ISO configuration
