@@ -26,7 +26,6 @@ rum install -y \
 hyprland \
 cpio \
 nss-altfiles \
-hyprland \
 hyprland-guiutils \
 uwsm \
 xorg-x11-server-Xwayland \
@@ -36,8 +35,8 @@ grim \
 slurp \
 wtype \
 wl-clipboard \
-noctalia-git \
-noctalia-greeter-git \
+noctalia \
+noctalia-greeter \
 xdg-desktop-portal \
 xdg-desktop-portal-hyprland \
 xdg-desktop-portal-gtk \

@@ -33,8 +33,8 @@ rum install -y \
   slurp \
   wtype \
   wl-clipboard \
-  noctalia-git \
-  noctalia-greeter-git \
+  noctalia \
+  noctalia-greeter \
   xdg-desktop-portal \
   xdg-desktop-portal-hyprland \
   xdg-desktop-portal-gtk \

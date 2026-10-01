@@ -119,11 +119,8 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   hyprland
   hyprland-guiutils
   uwsm
-  noctalia-git
-  noctalia-greeter-git
-  rakuos-welcome-qt
-  rakuos-system-qt
-  rakuos-software-qt
+  noctalia
+  noctalia-greeter
   ghostty
   ghostty-nautilus
   ghostty-kio
@@ -177,7 +174,6 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   zoxide
   fastfetch
   starship
-  fastfetch
   hyprpicker
   cliphist
   pavucontrol
@@ -189,6 +185,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   zbar
   rakuos-release-hyprland
   rakuos-software-gtk
+  rakuos-system-gtk
   rakuos-welcome-gtk
 EOF
 rum remove -y 'selinux-policy*' 'policycoreutils-gui'
