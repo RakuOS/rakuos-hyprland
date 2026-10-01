@@ -176,17 +176,11 @@ GloView is **not installed by default** and its binds are commented out. The
 package is in the `rakuos` repository, so it needs no extra repository:
 
 ```bash
-dnf install gloview-git
+rum install gloview-git
 ```
 
 The plugin lands at `/usr/lib64/gloview.so`.
 
-If you would rather take the build straight from upstream, the
-`mindset/Mindset-Apps` COPR also carries it, alongside several other apps
-(`swash`, `colloid-theme`, `monologue`, `obscura`, `hyprfm`, `zoom`,
-`orca-ide`, `xdg-desktop-portal-kwe`, and the `kineticwe` family). Most of
-those have since been copied into `rakuos`, so the COPR is only worth enabling
-for something the main repo does not carry yet.
 
 Then uncomment exactly two things:
 
