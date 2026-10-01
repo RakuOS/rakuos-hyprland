@@ -17,10 +17,6 @@ fi
 # it again before the image is finalized.
 rum config-manager --set-enabled terra
 
-# Enable COPR for Hyprland and Noctalia
-dnf -y copr enable lionheartp/Hyprland
-dnf -y copr enable mindset/Mindset-Apps
-
 ## Install packages
 # FIXME: Remove quickshell-git when Fedora gets 0.3 version
 # ghostty-kio satisfies ghostty's rich Requires (`ghostty-kio = ... if
