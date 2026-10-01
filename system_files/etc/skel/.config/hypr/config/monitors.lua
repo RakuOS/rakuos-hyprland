@@ -15,8 +15,11 @@
 --
 --     hl.monitor({ output = "eDP-1", scale = "2" })
 --
--- Note that the skel is copied into a home once, at account creation. Editing
--- it afterwards does not reach existing users.
+-- Note that the skel is copied into a home the first time you log in on this
+-- desktop environment. Your own copy in $HOME is what Hyprland reads from then
+-- on, so editing it is what changes your session -- edits to /etc/skel only
+-- reach accounts (or images) that have not been populated yet. See
+-- ~/.config/hypr/docs.md.
 hl.monitor({
     output    = MONITOR1,
     mode      = "preferred",

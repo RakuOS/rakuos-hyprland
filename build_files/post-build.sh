@@ -43,3 +43,19 @@ EOF
 # on every single login. Pure noise with nothing reading its output.
 # Reappears if the nvidia-settings RPM is upgraded or reinstalled.
 rm -f /etc/xdg/autostart/nvidia-settings-load.desktop
+
+
+## Hide uuctl and swash from the launcher; both stay runnable from a terminal.
+# NoDisplay=true rather than rm: both .desktop files are RPM-owned (uwsm, swash)
+# so a delete returns on upgrade, while this reapplies on every rebuild.
+for _entry in uuctl.desktop dev.lemmy.swash.desktop; do
+    _path="/usr/share/applications/$_entry"
+    [ -f "$_path" ] || continue
+    if grep -q '^NoDisplay=' "$_path"; then
+        sed -i "s/^NoDisplay=.*/NoDisplay=true/" "$_path"
+    else
+        # NoDisplay belongs in the Desktop Entry group; appending is valid there.
+        printf 'NoDisplay=true\n' >> "$_path"
+    fi
+done
+unset _entry _path

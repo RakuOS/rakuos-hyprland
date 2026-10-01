@@ -4,9 +4,11 @@ Every file lives under `~/.config/hypr/`. The format is Lua, not KDL.
 
 Reload after editing: `SUPER + SHIFT + R`
 
-> **Important for existing users.** This folder is *copied* into your home when
-> the account is created. If you already have an account, edit the files in your
-> own home directory. Edits to `/etc/skel` only reach newly created users.
+> **Important for existing users.** This folder is *copied* into your home the
+> first time you log in on this desktop environment. From then on Hyprland reads
+> the copy in your own home, so edit the files there — changes to `/etc/skel`
+> only reach accounts that have not been populated yet, and are copied without
+> overwriting anything you already have.
 
 ---
 
