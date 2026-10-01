@@ -64,7 +64,7 @@ populate_wallpapers
 ##
 ## Noctalia's own GTK template (assets/templates/gtk/apply.sh) writes gtk-theme
 ## and color-scheme via gsettings but never icon-theme, so nothing else in the
-## session sets this. Same approach as the official CachyOS skel.
+## session sets this.
 ##
 ## Needs a session bus; the unit is WantedBy=default.target so it starts with
 ## the graphical session. If gsettings is unavailable this is a no-op and the
