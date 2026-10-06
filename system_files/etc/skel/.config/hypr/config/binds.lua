@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════
--- Key Bindings — Omarchy Standard
+-- Key Bindings — Hyprland Noctalia
 -- ═══════════════════════════════════════════
 
 local M = "SUPER"
