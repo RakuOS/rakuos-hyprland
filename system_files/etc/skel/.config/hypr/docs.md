@@ -1,7 +1,5 @@
 # Hyprland Configuration — Quick Guide
 
-Every file lives under `~/.config/hypr/`. The format is Lua, not KDL.
-
 Reload after editing: `SUPER + SHIFT + R`
 
 > **Important for existing users.** This folder is *copied* into your home the
