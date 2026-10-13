@@ -1,9 +1,3 @@
-# Written by Noctalia at runtime — it reads this line, generates
-# ~/.config/ghostty/themes/noctalia from the active theme, and that is why no
-# placeholder theme ships in the skel. Until the first generation the name has
-# nothing to resolve against and Ghostty falls back to its own defaults.
-theme = noctalia
-
 # ===== FONT =====
 font-family = "JetBrainsMono Nerd Font"
 font-size = 11
