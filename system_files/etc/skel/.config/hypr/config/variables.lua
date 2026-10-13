@@ -5,7 +5,7 @@
 TERMINAL      = "ghostty"
 FILE_MANAGER  = "nautilus"
 BROWSER       = "firefox"
-EDITOR        = "zeditor"
+EDITOR        = "zed"
 CALCULATOR    = "gnome-calculator"
 
 MUSIC_PLAYER  = "mpv"

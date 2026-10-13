@@ -44,7 +44,7 @@ These variables are read by:
 TERMINAL     = "ghostty"
 FILE_MANAGER = "nautilus"
 BROWSER      = "firefox"
-EDITOR       = "zeditor"
+EDITOR       = "zed"
 CALCULATOR   = "gnome-calculator"
 ```
 
@@ -79,7 +79,7 @@ Shortcuts worth knowing:
 | `SUPER + F` / `SHIFT + F` | Fullscreen / maximize |
 | `SUPER + SHIFT + S` | Send window to scratchpad |
 | `Print` / `SHIFT + Print` / `CTRL + Print` | Screenshot region / fullscreen / window |
-| `SUPER + ALT` + click-drag | Move window (mouse:272) |
+| `SUPER` + click-drag | Move window (mouse:272) |
 | `SUPER + SHIFT + R` | Reload config |
 
 The scripts called by these binds live in `scripts/`:
