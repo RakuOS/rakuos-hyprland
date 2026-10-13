@@ -187,6 +187,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   rakuos-software-gtk
   rakuos-system-gtk
   rakuos-welcome-gtk
+  rakuos-shell-picker
 EOF
 rum remove -y 'selinux-policy*' 'policycoreutils-gui'
 rum install -y libselinux

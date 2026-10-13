@@ -93,10 +93,11 @@ rum install -y \
   rakuos-software-gtk \
   rakuos-system-gtk \
   rakuos-welcome-gtk \
+  rakuos-shell-picker \
 
 ## Kitty is replaced by ghostty, and wofi is used by neither Noctalia nor the
-## Noctalia Greeter. kitty-terminfo goes with it: skel exports TERM=xterm-ghostty,
-## so leaving it behind only ships a terminal type nothing references.
+## Noctalia Greeter. kitty-terminfo goes with it: ghostty ships its own
+## xterm-ghostty terminfo, so a kitty terminal type is referenced by nothing.
 rum remove -y wofi kitty kitty-kitten kitty-shell-integration kitty-terminfo 2>/dev/null || true
 
 ## Remove fedora wallpapers
