@@ -73,6 +73,12 @@ populate_wallpapers
 # (unit is WantedBy=default.target); no-op if gsettings is unavailable.
 if command -v gsettings > /dev/null 2>&1; then
     gsettings set org.gnome.desktop.interface icon-theme "Colloid-Dark"
+    # Same reason as the icon theme: the running session reads these from
+    # gsettings, so the skel settings.ini keys are only a fallback. Inter is
+    # the system UI font and Maple Mono NF the monospace one, shared by every
+    # DE so a switch does not change the app font.
+    gsettings set org.gnome.desktop.interface font-name "Inter 11"
+    gsettings set org.gnome.desktop.interface monospace-font-name "Maple Mono NF 11"
 fi
 
 # First-run marker: ensure the dir exists so the touch below doesn't fail
