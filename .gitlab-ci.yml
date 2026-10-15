@@ -22,10 +22,19 @@ variables:
   IMAGE_REGISTRY_QUAY_NVIDIA_V4: "quay.io/rakuos/rakuos-hyprland-nvidia-v4"
   IMAGE_REGISTRY_QUAY_V3: "quay.io/rakuos/rakuos-hyprland-v3"
   IMAGE_REGISTRY_QUAY_NVIDIA_V3: "quay.io/rakuos/rakuos-hyprland-nvidia-v3"
+  # Legacy NVIDIA (580xx driver: Maxwell, Pascal, Volta) images, built from
+  # the rakuos-base-nvidia-legacy images with the same Containerfile.nvidia.
+  IMAGE_REGISTRY_NVIDIA_LEGACY: "registry.gitlab.com/rakuos/images/rakuos-hyprland/nvidia-legacy"
+  IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY: "quay.io/rakuos/rakuos-hyprland-nvidia-legacy"
+  IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4: "quay.io/rakuos/rakuos-hyprland-nvidia-legacy-v4"
+  IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3: "quay.io/rakuos/rakuos-hyprland-nvidia-legacy-v3"
   BASE_IMAGE_REPO_V4: "quay.io/rakuos/rakuos-base-v4"
   BASE_IMAGE_REPO_NVIDIA_V4: "quay.io/rakuos/rakuos-base-nvidia-v4"
   BASE_IMAGE_REPO_V3: "quay.io/rakuos/rakuos-base-v3"
   BASE_IMAGE_REPO_NVIDIA_V3: "quay.io/rakuos/rakuos-base-nvidia-v3"
+  BASE_IMAGE_REPO_NVIDIA_LEGACY: "quay.io/rakuos/rakuos-base-nvidia-legacy"
+  BASE_IMAGE_REPO_NVIDIA_LEGACY_V4: "quay.io/rakuos/rakuos-base-nvidia-legacy-v4"
+  BASE_IMAGE_REPO_NVIDIA_LEGACY_V3: "quay.io/rakuos/rakuos-base-nvidia-legacy-v3"
   DEFAULT_TAG: "latest"
   IMAGE_DESC: "RakuOS Niri"
   IMAGE_KEYWORDS: "bootc,fedora,atomic,niri"
@@ -471,6 +480,159 @@ build-nvidia-v3:
     - if: '$CI_COMMIT_BRANCH == "rawhide"'
     - if: '$CI_COMMIT_BRANCH == "rakuosel"'
 
+build-nvidia-legacy:
+  extends: .buildah-job
+  stage: build
+  script:
+    - |
+      if [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH}" ]; then
+        TAGS="${IMAGE_REGISTRY_NVIDIA_LEGACY}:${DEFAULT_TAG} ${IMAGE_REGISTRY_NVIDIA_LEGACY}:${DEFAULT_TAG}.${DATE_TAG} ${IMAGE_REGISTRY_NVIDIA_LEGACY}:${DATE_TAG}"
+      else
+        TAGS="${IMAGE_REGISTRY_NVIDIA_LEGACY}:${BRANCH_SLUG} ${IMAGE_REGISTRY_NVIDIA_LEGACY}:${BRANCH_SLUG}.${DATE_TAG}"
+      fi
+      export TAGS BRANCH_SLUG
+      printf 'TAGS_NVIDIA_LEGACY=%s\nBRANCH_SLUG=%s\n' "${TAGS}" "${BRANCH_SLUG}" > build-nvidia-legacy.env
+
+    - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:ci-temp-${CI_PIPELINE_ID}"
+
+    - |
+      buildah build \
+        --file Containerfile.nvidia \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY}" \
+        --skip-unused-stages=false \
+        -v "$(pwd)":/run/src --security-opt=label=disable \
+        --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
+        --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA legacy, 580xx)" \
+        --label "org.opencontainers.image.source=${CI_PROJECT_URL}" \
+        --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
+        --label "org.opencontainers.image.vendor=RakuOS" \
+        --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
+        --label "containers.bootc=1" \
+        --tag "${TEMP_TAG}" \
+        .
+
+    - |
+      if [ "${CI_PIPELINE_SOURCE}" != "merge_request_event" ]; then
+        buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+        echo "Pushing temporary image ${TEMP_TAG}..."
+        buildah push --compression-format zstd:chunked "${TEMP_TAG}" "docker://${TEMP_TAG}"
+      fi
+  artifacts:
+    reports:
+      dotenv: build-nvidia-legacy.env
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
+build-nvidia-legacy-v4:
+  extends: .buildah-job
+  stage: build
+  script:
+    - |
+      if [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH}" ]; then
+        TAGS="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${DEFAULT_TAG} ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${DEFAULT_TAG}.${DATE_TAG} ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${DATE_TAG}"
+      else
+        TAGS="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${BRANCH_SLUG} ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${BRANCH_SLUG}.${DATE_TAG}"
+      fi
+      export TAGS BRANCH_SLUG
+      printf 'TAGS_NVIDIA_LEGACY=%s\nBRANCH_SLUG=%s\n' "${TAGS}" "${BRANCH_SLUG}" > build-nvidia-legacy-v4.env
+
+    - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:ci-temp-${CI_PIPELINE_ID}"
+
+    - |
+      buildah build \
+        --file Containerfile.nvidia \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY_V4}" \
+        --skip-unused-stages=false \
+        -v "$(pwd)":/run/src --security-opt=label=disable \
+        --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
+        --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA legacy, 580xx)" \
+        --label "org.opencontainers.image.source=${CI_PROJECT_URL}" \
+        --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
+        --label "org.opencontainers.image.vendor=RakuOS" \
+        --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
+        --label "containers.bootc=1" \
+        --tag "${TEMP_TAG}" \
+        .
+
+    - |
+      if [ "${CI_PIPELINE_SOURCE}" != "merge_request_event" ]; then
+        buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+        echo "Pushing temporary image ${TEMP_TAG}..."
+        buildah push --compression-format zstd:chunked "${TEMP_TAG}" "docker://${TEMP_TAG}"
+      fi
+  artifacts:
+    reports:
+      dotenv: build-nvidia-legacy-v4.env
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
+build-nvidia-legacy-v3:
+  extends: .buildah-job
+  stage: build
+  script:
+    - |
+      if [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH}" ]; then
+        TAGS="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${DEFAULT_TAG} ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${DEFAULT_TAG}.${DATE_TAG} ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${DATE_TAG}"
+      else
+        TAGS="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${BRANCH_SLUG} ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${BRANCH_SLUG}.${DATE_TAG}"
+      fi
+      export TAGS BRANCH_SLUG
+      printf 'TAGS_NVIDIA_LEGACY=%s\nBRANCH_SLUG=%s\n' "${TAGS}" "${BRANCH_SLUG}" > build-nvidia-legacy-v3.env
+
+    - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:ci-temp-${CI_PIPELINE_ID}"
+
+    - |
+      buildah build \
+        --file Containerfile.nvidia \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY_V3}" \
+        --skip-unused-stages=false \
+        -v "$(pwd)":/run/src --security-opt=label=disable \
+        --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
+        --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA legacy, 580xx)" \
+        --label "org.opencontainers.image.source=${CI_PROJECT_URL}" \
+        --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
+        --label "org.opencontainers.image.vendor=RakuOS" \
+        --label "org.opencontainers.image.keywords=${IMAGE_KEYWORDS}" \
+        --label "org.rakuos.fedora.version=${FEDORA_VERSION}" \
+        --label "containers.bootc=1" \
+        --tag "${TEMP_TAG}" \
+        .
+
+    - |
+      if [ "${CI_PIPELINE_SOURCE}" != "merge_request_event" ]; then
+        buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+        echo "Pushing temporary image ${TEMP_TAG}..."
+        buildah push --compression-format zstd:chunked "${TEMP_TAG}" "docker://${TEMP_TAG}"
+      fi
+  artifacts:
+    reports:
+      dotenv: build-nvidia-legacy-v3.env
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
 trigger-on-base-build-fail-v4:
   extends: .trigger-on-build-fail
   needs:
@@ -493,6 +655,24 @@ trigger-on-nvidia-build-fail-v3:
   extends: .trigger-on-build-fail
   needs:
     - job: build-nvidia-v3
+      artifacts: false
+
+trigger-on-nvidia-legacy-build-fail:
+  extends: .trigger-on-build-fail
+  needs:
+    - job: build-nvidia-legacy
+      artifacts: false
+
+trigger-on-nvidia-legacy-build-fail-v4:
+  extends: .trigger-on-build-fail
+  needs:
+    - job: build-nvidia-legacy-v4
+      artifacts: false
+
+trigger-on-nvidia-legacy-build-fail-v3:
+  extends: .trigger-on-build-fail
+  needs:
+    - job: build-nvidia-legacy-v3
       artifacts: false
 
 # ============================================================
@@ -711,6 +891,105 @@ test-image-nvidia-v3:
       buildah rm "${CTR}" || true
       echo "RPM DB stress test (NVIDIA) passed."
 
+test-image-nvidia-legacy:
+  extends: .image-test-job
+  stage: test-iso
+  needs:
+    - job: build-nvidia-legacy
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      IMAGE_REF="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:ci-temp-${CI_PIPELINE_ID}"
+      buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      buildah pull "docker://${IMAGE_REF}"
+      CTR=$(buildah from "${IMAGE_REF}")
+
+      echo "=== RPM DB stress test: Justfile + Anaconda packages ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        rum install -y --allowerasing \
+          --enable-repo=fedora-cisco-openh264 \
+          dracut-live livesys-scripts fuse-overlayfs \
+          anaconda-live libblockdev-btrfs libblockdev-lvm libblockdev-dm \
+          qrencode yad
+
+      echo "=== RPM DB stress test: packages-live.list ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        bash -c 'grep -v "^\s*#" /usr/share/rakuos/packages-live.list | grep -v "^\s*$" | sed "s/\s*#.*//" | tr -s " \t" "\n" | grep -v "^$" | xargs rum install -y'
+
+      echo "=== RPM DB stress test: NVIDIA packages ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        bash -c 'for pkg in nvidia-gpu-firmware mesa-vulkan-drivers; do rum reinstall -y --allowerasing "$pkg" || rum install -y --allowerasing "$pkg"; done'
+
+      buildah rm "${CTR}" || true
+      echo "RPM DB stress test (NVIDIA legacy, 580xx) passed."
+
+test-image-nvidia-legacy-v4:
+  extends: .image-test-job
+  stage: test-iso
+  needs:
+    - job: build-nvidia-legacy-v4
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      IMAGE_REF="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:ci-temp-${CI_PIPELINE_ID}"
+      buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      buildah pull "docker://${IMAGE_REF}"
+      CTR=$(buildah from "${IMAGE_REF}")
+
+      echo "=== RPM DB stress test: Justfile + Anaconda packages ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        rum install -y --allowerasing \
+          --enable-repo=fedora-cisco-openh264 \
+          dracut-live livesys-scripts fuse-overlayfs \
+          anaconda-live libblockdev-btrfs libblockdev-lvm libblockdev-dm \
+          qrencode yad
+
+      echo "=== RPM DB stress test: packages-live.list ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        bash -c 'grep -v "^\s*#" /usr/share/rakuos/packages-live.list | grep -v "^\s*$" | sed "s/\s*#.*//" | tr -s " \t" "\n" | grep -v "^$" | xargs rum install -y'
+
+      echo "=== RPM DB stress test: NVIDIA packages ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        bash -c 'for pkg in nvidia-gpu-firmware mesa-vulkan-drivers; do rum reinstall -y --allowerasing "$pkg" || rum install -y --allowerasing "$pkg"; done'
+
+      buildah rm "${CTR}" || true
+      echo "RPM DB stress test (NVIDIA legacy, 580xx) passed."
+
+test-image-nvidia-legacy-v3:
+  extends: .image-test-job
+  stage: test-iso
+  needs:
+    - job: build-nvidia-legacy-v3
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      IMAGE_REF="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:ci-temp-${CI_PIPELINE_ID}"
+      buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      buildah pull "docker://${IMAGE_REF}"
+      CTR=$(buildah from "${IMAGE_REF}")
+
+      echo "=== RPM DB stress test: Justfile + Anaconda packages ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        rum install -y --allowerasing \
+          --enable-repo=fedora-cisco-openh264 \
+          dracut-live livesys-scripts fuse-overlayfs \
+          anaconda-live libblockdev-btrfs libblockdev-lvm libblockdev-dm \
+          qrencode yad
+
+      echo "=== RPM DB stress test: packages-live.list ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        bash -c 'grep -v "^\s*#" /usr/share/rakuos/packages-live.list | grep -v "^\s*$" | sed "s/\s*#.*//" | tr -s " \t" "\n" | grep -v "^$" | xargs rum install -y'
+
+      echo "=== RPM DB stress test: NVIDIA packages ==="
+      buildah run --isolation chroot --network host "${CTR}" -- \
+        bash -c 'for pkg in nvidia-gpu-firmware mesa-vulkan-drivers; do rum reinstall -y --allowerasing "$pkg" || rum install -y --allowerasing "$pkg"; done'
+
+      buildah rm "${CTR}" || true
+      echo "RPM DB stress test (NVIDIA legacy, 580xx) passed."
+
 .trigger-on-iso-fail:
   stage: test-iso
   image: quay.io/fedora/fedora:latest
@@ -786,6 +1065,24 @@ trigger-on-image-nvidia-fail-v3:
   extends: .trigger-on-iso-fail
   needs:
     - job: test-image-nvidia-v3
+      artifacts: false
+
+trigger-on-image-nvidia-legacy-fail:
+  extends: .trigger-on-iso-fail
+  needs:
+    - job: test-image-nvidia-legacy
+      artifacts: false
+
+trigger-on-image-nvidia-legacy-fail-v4:
+  extends: .trigger-on-iso-fail
+  needs:
+    - job: test-image-nvidia-legacy-v4
+      artifacts: false
+
+trigger-on-image-nvidia-legacy-fail-v3:
+  extends: .trigger-on-iso-fail
+  needs:
+    - job: test-image-nvidia-legacy-v3
       artifacts: false
 
 push-tags-base:
@@ -1234,6 +1531,180 @@ push-tags-nvidia-v3:
     - if: '$CI_COMMIT_BRANCH == "rawhide"'
     - if: '$CI_COMMIT_BRANCH == "rakuosel"'
 
+push-tags-nvidia-legacy:
+  stage: push
+  image: quay.io/buildah/stable:latest
+  tags:
+    - saas-linux-medium-amd64
+  needs:
+    - job: test-image-standard
+      artifacts: false
+    - job: test-image-nvidia-legacy
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      dnf install -y --quiet jq
+      case "${CI_COMMIT_BRANCH}" in
+        "${CI_DEFAULT_BRANCH}") BRANCH_SLUG="${DEFAULT_TAG}" ;;
+        "staging")              BRANCH_SLUG="staging"        ;;
+        "rawhide")              BRANCH_SLUG="rawhide"        ;;
+        "rakuosel")             BRANCH_SLUG="rakuosel"       ;;
+        *)                      BRANCH_SLUG="$(printf '%s' "${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')" ;;
+      esac
+      DATE_TAG="$(date -u +%Y%m%d)"
+      TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:ci-temp-${CI_PIPELINE_ID}"
+      buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      buildah pull "docker://${TEMP_TAG}"
+      if [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH}" ]; then
+        PRIMARY_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:${DEFAULT_TAG}"
+        ALIAS_TAGS="${DEFAULT_TAG}.${DATE_TAG} ${DATE_TAG}"
+      else
+        PRIMARY_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:${BRANCH_SLUG}"
+        ALIAS_TAGS="${BRANCH_SLUG}.${DATE_TAG}"
+      fi
+      echo "Pushing ${PRIMARY_TAG}..."
+      buildah push --compression-format zstd:chunked "${TEMP_TAG}" "docker://${PRIMARY_TAG}"
+      REPO_PATH="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY#quay.io/}"
+      PRIMARY_TAG_NAME="${PRIMARY_TAG##*:}"
+      DIGEST=$(curl -sf \
+        -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+        "https://quay.io/api/v1/repository/${REPO_PATH}/tag/?specificTag=${PRIMARY_TAG_NAME}&limit=1" \
+        | jq -r '.tags[0].manifest_digest')
+      echo "Manifest digest: ${DIGEST}"
+      for alias in ${ALIAS_TAGS}; do
+        echo "Aliasing :${alias} → ${DIGEST}..."
+        curl -sf -X PUT \
+          -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "{\"manifest_digest\": \"${DIGEST}\"}" \
+          "https://quay.io/api/v1/repository/${REPO_PATH}/tag/${alias}"
+      done
+      echo "All tags pushed and aliased."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
+push-tags-nvidia-legacy-v4:
+  stage: push
+  image: quay.io/buildah/stable:latest
+  tags:
+    - saas-linux-medium-amd64
+  needs:
+    - job: test-image-standard-v4
+      artifacts: false
+    - job: test-image-nvidia-legacy-v4
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      dnf install -y --quiet jq
+      case "${CI_COMMIT_BRANCH}" in
+        "${CI_DEFAULT_BRANCH}") BRANCH_SLUG="${DEFAULT_TAG}" ;;
+        "staging")              BRANCH_SLUG="staging"        ;;
+        "rawhide")              BRANCH_SLUG="rawhide"        ;;
+        "rakuosel")             BRANCH_SLUG="rakuosel"       ;;
+        *)                      BRANCH_SLUG="$(printf '%s' "${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')" ;;
+      esac
+      DATE_TAG="$(date -u +%Y%m%d)"
+      TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:ci-temp-${CI_PIPELINE_ID}"
+      buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      buildah pull "docker://${TEMP_TAG}"
+      if [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH}" ]; then
+        PRIMARY_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${DEFAULT_TAG}"
+        ALIAS_TAGS="${DEFAULT_TAG}.${DATE_TAG} ${DATE_TAG}"
+      else
+        PRIMARY_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${BRANCH_SLUG}"
+        ALIAS_TAGS="${BRANCH_SLUG}.${DATE_TAG}"
+      fi
+      echo "Pushing ${PRIMARY_TAG}..."
+      buildah push --compression-format zstd:chunked "${TEMP_TAG}" "docker://${PRIMARY_TAG}"
+      REPO_PATH="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4#quay.io/}"
+      PRIMARY_TAG_NAME="${PRIMARY_TAG##*:}"
+      DIGEST=$(curl -sf \
+        -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+        "https://quay.io/api/v1/repository/${REPO_PATH}/tag/?specificTag=${PRIMARY_TAG_NAME}&limit=1" \
+        | jq -r '.tags[0].manifest_digest')
+      echo "Manifest digest: ${DIGEST}"
+      for alias in ${ALIAS_TAGS}; do
+        echo "Aliasing :${alias} → ${DIGEST}..."
+        curl -sf -X PUT \
+          -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "{\"manifest_digest\": \"${DIGEST}\"}" \
+          "https://quay.io/api/v1/repository/${REPO_PATH}/tag/${alias}"
+      done
+      echo "All tags pushed and aliased."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
+push-tags-nvidia-legacy-v3:
+  stage: push
+  image: quay.io/buildah/stable:latest
+  tags:
+    - saas-linux-medium-amd64
+  needs:
+    - job: test-image-standard-v3
+      artifacts: false
+    - job: test-image-nvidia-legacy-v3
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      dnf install -y --quiet jq
+      case "${CI_COMMIT_BRANCH}" in
+        "${CI_DEFAULT_BRANCH}") BRANCH_SLUG="${DEFAULT_TAG}" ;;
+        "staging")              BRANCH_SLUG="staging"        ;;
+        "rawhide")              BRANCH_SLUG="rawhide"        ;;
+        "rakuosel")             BRANCH_SLUG="rakuosel"       ;;
+        *)                      BRANCH_SLUG="$(printf '%s' "${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')" ;;
+      esac
+      DATE_TAG="$(date -u +%Y%m%d)"
+      TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:ci-temp-${CI_PIPELINE_ID}"
+      buildah login -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      buildah pull "docker://${TEMP_TAG}"
+      if [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH}" ]; then
+        PRIMARY_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${DEFAULT_TAG}"
+        ALIAS_TAGS="${DEFAULT_TAG}.${DATE_TAG} ${DATE_TAG}"
+      else
+        PRIMARY_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${BRANCH_SLUG}"
+        ALIAS_TAGS="${BRANCH_SLUG}.${DATE_TAG}"
+      fi
+      echo "Pushing ${PRIMARY_TAG}..."
+      buildah push --compression-format zstd:chunked "${TEMP_TAG}" "docker://${PRIMARY_TAG}"
+      REPO_PATH="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3#quay.io/}"
+      PRIMARY_TAG_NAME="${PRIMARY_TAG##*:}"
+      DIGEST=$(curl -sf \
+        -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+        "https://quay.io/api/v1/repository/${REPO_PATH}/tag/?specificTag=${PRIMARY_TAG_NAME}&limit=1" \
+        | jq -r '.tags[0].manifest_digest')
+      echo "Manifest digest: ${DIGEST}"
+      for alias in ${ALIAS_TAGS}; do
+        echo "Aliasing :${alias} → ${DIGEST}..."
+        curl -sf -X PUT \
+          -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "{\"manifest_digest\": \"${DIGEST}\"}" \
+          "https://quay.io/api/v1/repository/${REPO_PATH}/tag/${alias}"
+      done
+      echo "All tags pushed and aliased."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
 sign-image-standard-v4:
   stage: sign
   image: quay.io/buildah/stable:latest
@@ -1430,6 +1901,153 @@ sign-image-nvidia-v3:
     - if: '$CI_COMMIT_BRANCH == "rawhide"'
     - if: '$CI_COMMIT_BRANCH == "rakuosel"'
 
+sign-image-nvidia-legacy:
+  stage: sign
+  image: quay.io/buildah/stable:latest
+  tags:
+    - saas-linux-medium-amd64
+  needs:
+    - job: push-tags-nvidia-legacy
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      curl -fsSL "https://github.com/sigstore/cosign/releases/download/v1.0.0/cosign-linux-amd64" \
+        -o /usr/local/bin/cosign
+      chmod +x /usr/local/bin/cosign
+      dnf install -y --quiet jq podman
+      podman login --authfile ~/.docker/config.json \
+        -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      case "${CI_COMMIT_BRANCH}" in
+        "${CI_DEFAULT_BRANCH}") PRIMARY_TAG_NAME="${DEFAULT_TAG}" ;;
+        "staging")              PRIMARY_TAG_NAME="staging"        ;;
+        "rawhide")              PRIMARY_TAG_NAME="rawhide"        ;;
+        "rakuosel")             PRIMARY_TAG_NAME="rakuosel"       ;;
+        *) PRIMARY_TAG_NAME="$(printf '%s' "${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')" ;;
+      esac
+      COSIGN_KEY_ID=$(curl --silent \
+          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/secure_files" \
+          | jq -r '.[] | select(.name == "cosign.key") | .id')
+      curl --silent \
+          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          -o /tmp/cosign.key \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/secure_files/${COSIGN_KEY_ID}/download"
+      chmod 600 /tmp/cosign.key
+      echo "Signing ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:${PRIMARY_TAG_NAME}..."
+      COSIGN_PASSWORD="${COSIGN_PASSWORD:-}" cosign sign \
+        -key /tmp/cosign.key \
+        -a "repo=${CI_PROJECT_URL}" \
+        -a "branch=${CI_COMMIT_BRANCH}" \
+        "${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:${PRIMARY_TAG_NAME}"
+      rm -f /tmp/cosign.key
+      echo "Image signed successfully."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
+sign-image-nvidia-legacy-v4:
+  stage: sign
+  image: quay.io/buildah/stable:latest
+  tags:
+    - saas-linux-medium-amd64
+  needs:
+    - job: push-tags-nvidia-legacy-v4
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      curl -fsSL "https://github.com/sigstore/cosign/releases/download/v1.0.0/cosign-linux-amd64" \
+        -o /usr/local/bin/cosign
+      chmod +x /usr/local/bin/cosign
+      dnf install -y --quiet jq podman
+      podman login --authfile ~/.docker/config.json \
+        -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      case "${CI_COMMIT_BRANCH}" in
+        "${CI_DEFAULT_BRANCH}") PRIMARY_TAG_NAME="${DEFAULT_TAG}" ;;
+        "staging")              PRIMARY_TAG_NAME="staging"        ;;
+        "rawhide")              PRIMARY_TAG_NAME="rawhide"        ;;
+        "rakuosel")             PRIMARY_TAG_NAME="rakuosel"       ;;
+        *) PRIMARY_TAG_NAME="$(printf '%s' "${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')" ;;
+      esac
+      COSIGN_KEY_ID=$(curl --silent \
+          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/secure_files" \
+          | jq -r '.[] | select(.name == "cosign.key") | .id')
+      curl --silent \
+          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          -o /tmp/cosign.key \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/secure_files/${COSIGN_KEY_ID}/download"
+      chmod 600 /tmp/cosign.key
+      echo "Signing ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${PRIMARY_TAG_NAME}..."
+      COSIGN_PASSWORD="${COSIGN_PASSWORD:-}" cosign sign \
+        -key /tmp/cosign.key \
+        -a "repo=${CI_PROJECT_URL}" \
+        -a "branch=${CI_COMMIT_BRANCH}" \
+        "${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:${PRIMARY_TAG_NAME}"
+      rm -f /tmp/cosign.key
+      echo "Image signed successfully."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
+sign-image-nvidia-legacy-v3:
+  stage: sign
+  image: quay.io/buildah/stable:latest
+  tags:
+    - saas-linux-medium-amd64
+  needs:
+    - job: push-tags-nvidia-legacy-v3
+      artifacts: false
+  script:
+    - |
+      set -euo pipefail
+      curl -fsSL "https://github.com/sigstore/cosign/releases/download/v1.0.0/cosign-linux-amd64" \
+        -o /usr/local/bin/cosign
+      chmod +x /usr/local/bin/cosign
+      dnf install -y --quiet jq podman
+      podman login --authfile ~/.docker/config.json \
+        -u "${QUAY_USER}" -p "${QUAY_TOKEN}" quay.io
+      case "${CI_COMMIT_BRANCH}" in
+        "${CI_DEFAULT_BRANCH}") PRIMARY_TAG_NAME="${DEFAULT_TAG}" ;;
+        "staging")              PRIMARY_TAG_NAME="staging"        ;;
+        "rawhide")              PRIMARY_TAG_NAME="rawhide"        ;;
+        "rakuosel")             PRIMARY_TAG_NAME="rakuosel"       ;;
+        *) PRIMARY_TAG_NAME="$(printf '%s' "${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')" ;;
+      esac
+      COSIGN_KEY_ID=$(curl --silent \
+          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/secure_files" \
+          | jq -r '.[] | select(.name == "cosign.key") | .id')
+      curl --silent \
+          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          -o /tmp/cosign.key \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/secure_files/${COSIGN_KEY_ID}/download"
+      chmod 600 /tmp/cosign.key
+      echo "Signing ${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${PRIMARY_TAG_NAME}..."
+      COSIGN_PASSWORD="${COSIGN_PASSWORD:-}" cosign sign \
+        -key /tmp/cosign.key \
+        -a "repo=${CI_PROJECT_URL}" \
+        -a "branch=${CI_COMMIT_BRANCH}" \
+        "${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:${PRIMARY_TAG_NAME}"
+      rm -f /tmp/cosign.key
+      echo "Image signed successfully."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "rawhide"'
+    - if: '$CI_COMMIT_BRANCH == "rakuosel"'
+
 cleanup-temp-tags:
   stage: cleanup
   image: quay.io/buildah/stable:latest
@@ -1459,6 +2077,15 @@ cleanup-temp-tags:
       curl -sf -X DELETE \
         -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
         "https://quay.io/api/v1/repository/${IMAGE_REGISTRY_QUAY_NVIDIA_V3#quay.io/}/tag/${TEMP_TAG_NAME}" || true
+      curl -sf -X DELETE \
+        -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+        "https://quay.io/api/v1/repository/${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY#quay.io/}/tag/${TEMP_TAG_NAME}" || true
+      curl -sf -X DELETE \
+        -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+        "https://quay.io/api/v1/repository/${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4#quay.io/}/tag/${TEMP_TAG_NAME}" || true
+      curl -sf -X DELETE \
+        -H "Authorization: Bearer ${QUAY_API_TOKEN}" \
+        "https://quay.io/api/v1/repository/${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3#quay.io/}/tag/${TEMP_TAG_NAME}" || true
       echo "Temp tag cleanup complete."
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -1491,6 +2118,12 @@ notify-discord:
     - job: sign-image-nvidia-v4
       optional: true
     - job: sign-image-nvidia-v3
+      optional: true
+    - job: sign-image-nvidia-legacy
+      optional: true
+    - job: sign-image-nvidia-legacy-v4
+      optional: true
+    - job: sign-image-nvidia-legacy-v3
       optional: true
     - job: cleanup-temp-tags
       optional: true
