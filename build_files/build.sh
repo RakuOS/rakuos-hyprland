@@ -15,14 +15,17 @@ fi
 # Terra ships disabled by default (third-party repos are opt-in), so enable
 # it here in case any packages below come from Terra; post-build.sh disables
 # it again before the image is finalized.
-rum config-manager --set-enabled terra
+rum config-manager --default --set-enabled terra
+# RPM Fusion is disabled in the base image too; turn its default repos back
+# on (the list base post-build.sh recorded). post-build.sh disables them again.
+rum config-manager --default --set-enabled $(cat /usr/share/rakuos/rpmfusion-default-repos)
 
 ## Install packages
 # FIXME: Remove quickshell-git when Fedora gets 0.3 version
 # ghostty-kio satisfies ghostty's rich Requires (`ghostty-kio = ... if
 # kf6-kio-core`); without it baked in now, any later kf6-kio-core install
 # (e.g. kde-partitionmanager) fails once Terra is disabled below.
-rum install -y \
+rum install -y --skip-broken --skip-unavailable \
   hyprland \
   hyprland-guiutils \
   uwsm \
@@ -93,10 +96,11 @@ rum install -y \
   rakuos-software-gtk \
   rakuos-system-gtk \
   rakuos-welcome-gtk \
+  rakuos-shell-picker \
 
 ## Kitty is replaced by ghostty, and wofi is used by neither Noctalia nor the
-## Noctalia Greeter. kitty-terminfo goes with it: skel exports TERM=xterm-ghostty,
-## so leaving it behind only ships a terminal type nothing references.
+## Noctalia Greeter. kitty-terminfo goes with it: ghostty ships its own
+## xterm-ghostty terminfo, so a kitty terminal type is referenced by nothing.
 rum remove -y wofi kitty kitty-kitten kitty-shell-integration kitty-terminfo 2>/dev/null || true
 
 ## Remove fedora wallpapers
