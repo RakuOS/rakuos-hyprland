@@ -23,7 +23,7 @@ IMAGE_DESC="RakuOS Hyprland"
 IMAGE_KEYWORDS="bootc,fedora,atomic,hyprland"
 # org.rakuos.fedora.version label per branch (as in .gitlab-ci.yml).
 FEDORA_MAIN="44"
-FEDORA_STAGING="44"
+FEDORA_STAGING="45"
 # 1 = fetch MOK.key and pass it to the build as the mok_key secret.
 NEEDS_MOK="0"
 DEFAULT_TAG="latest"
