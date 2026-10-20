@@ -1,0 +1,775 @@
+#!/bin/bash
+
+## rakuos-hyprland-greeter — choose which greeter starts at boot.
+##
+##   noctalia    image default, a wrapped wlroots session (not a bare binary)
+##   dms         dms-greeter, brings its own Hyprland and theme sync
+##   sddm        not greetd; X11 greeter, for when greetd is the problem
+##   sysc-greet  console TUI on cagebreak, works without a GPU stack
+##
+## Nothing here starts a display manager: starting one from a live session
+## opens a second login screen. The change applies on the next boot.
+
+set -u
+
+## fzf re-runs this script for every preview, so the path must be absolute.
+SELF=$(readlink -f "$0" 2>/dev/null || echo "$0")
+
+ASSUME_YES=0
+PRUNE=0
+
+die() {
+    echo "rakuos-hyprland greeter: $*" >&2
+    exit 1
+}
+
+if [ "$EUID" -eq 0 ]; then
+    die "run this as your own user, not as root: it calls sudo when it needs it"
+fi
+
+usage() {
+    cat <<'EOF'
+Usage: rakuos-hyprland greeter [option] [-y]
+
+Options:
+  noctalia     Noctalia Greeter — image default, bundled wlroots compositor
+  dms          DMS Greeter — matches DankMaterialShell, runs its own Hyprland
+  sddm         SDDM — leaves greetd behind, X11 greeter (fallback DM)
+  sysc-greet   sysc-greet — console TUI on cagebreak, survives a broken GUI
+  prune        remove a greeter you no longer use (the active one is never
+               offered, and nothing needs to be rebooted)
+
+  -y, --yes    do not ask for confirmation (for scripts)
+  --prune      remove greeters you no longer use (the active one is never
+               offered, and no reboot is needed)
+  -h, --help   this text
+
+Without an option, a menu lists the four. The choice for noctalia, dms and
+sysc-greet is written to /etc/greetd/config.toml; sddm is different and is
+handled by systemd's display-manager alias instead. Either way it takes effect
+on the next reboot, never in the running session.
+
+Greeter themes only match the shell with the same name, so switch the shell
+first (`rakuos-hyprland shell`) and the greeter after it.
+EOF
+}
+
+have() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+## For paths that are not binaries in $PATH (e.g. Xorg modules).
+have_any() {
+    have "$1" || [ -e "$1" ]
+}
+
+## Read the real setup: config.toml may name a greeter that is gone, and sddm
+## does not read config.toml at all.
+current_greeter() {
+    local dm command
+
+    ## A stale symlink to a removed sddm is not what will run.
+    dm=$(readlink -f /etc/systemd/system/display-manager.service 2>/dev/null)
+    case "$dm" in
+        */sddm.service)
+            have_any /usr/bin/sddm && { echo "sddm"; return; }
+            ;;
+    esac
+
+    command=$(grep -E '^command[[:space:]]*=' /etc/greetd/config.toml 2>/dev/null | head -n 1)
+    case "$command" in
+        *dms-greeter*)    echo "dms" ;;
+        *noctalia*)       echo "noctalia" ;;
+        *cagebreak*)      echo "sysc-greet" ;;
+        *)                echo "unknown" ;;
+    esac
+}
+
+confirm() {
+    local question="$1"
+
+    if [ "$ASSUME_YES" -eq 1 ]; then
+        return 0
+    fi
+
+    if have gum; then
+        gum confirm --prompt.foreground="#cba6f7" \
+            --selected.background="#cba6f7" --selected.foreground="#1e1e2e" \
+            "$question"
+    else
+        local reply
+        echo
+        read -r -p "$question [y/N] " reply
+        [[ $reply =~ ^[Yy]$ ]]
+    fi
+}
+
+## Only the [default_session] command line is rewritten. `command =` appears
+## once in the file; the commented-out examples above it start with '#'.
+set_command() {
+    local command="$1" config=/etc/greetd/config.toml
+
+    if [ -f "$config" ]; then
+        # One copy of the file as it was, kept for the TTY you end up on if the
+        # new greeter does not start. Restore with:
+        #   sudo cp -p /etc/greetd/config.toml.bak /etc/greetd/config.toml
+        if [ ! -f "$config.bak" ]; then
+            # cp -p copies the source mode; 666 in /etc is needless.
+            sudo cp -p "$config" "$config.bak" &&
+                sudo chmod 644 "$config.bak"
+        fi
+        sudo sed -i "s|^command[[:space:]]*=.*|command = \"$command\"|" "$config"
+    else
+        sudo install -d -m 755 /etc/greetd
+        printf '[terminal]\nvt = 1\n\n[default_session]\ncommand = "%s"\nuser = "greeter"\n' \
+            "$command" | sudo tee "$config" >/dev/null
+    fi
+
+    grep -qF "command = \"$command\"" "$config" ||
+        die "could not write the command line in $config"
+}
+
+greetd_takes_over() {
+    if systemctl is-enabled --quiet sddm 2>/dev/null; then
+        sudo systemctl disable sddm || die "could not disable sddm"
+    fi
+
+    if ! systemctl is-enabled --quiet greetd 2>/dev/null; then
+        if ! sudo systemctl enable greetd; then
+            # Do not leave the machine without a display manager.
+            sudo systemctl enable sddm 2>/dev/null || true
+            die "could not enable greetd (sddm re-enabled)"
+        fi
+    fi
+}
+
+sddm_takes_over() {
+    # Order matters: display-manager.service can point at one unit only, and
+    # `systemctl enable sddm` refuses to overwrite greetd's symlink.
+    if systemctl is-enabled --quiet greetd 2>/dev/null; then
+        sudo systemctl disable greetd || die "could not disable greetd"
+    fi
+
+    if ! sudo systemctl enable sddm; then
+        sudo systemctl enable greetd 2>/dev/null || true
+        die "could not enable sddm (greetd re-enabled)"
+    fi
+}
+
+## Installs only when the binary is missing. A greeter that is already on the
+## machine is not reinstalled: the switch is a config edit, not an upgrade, and
+## an image that ships one of these should not need the repository to switch
+## back to it.
+install_greeter() {
+    local package="$1" binary="$2"
+    shift 2
+
+    have_any "$binary" && return 0
+
+    sudo rum install -y --refresh "$@" "$package" ||
+        die "$package could not be installed"
+}
+
+## The old greeter stays installed: it is the way back from a TTY, and nothing
+## has to be downloaded while no desktop is running.
+
+## cagebreak and socat belong to sysc-greet only.
+greeter_packages() {
+    case "$1" in
+        noctalia)   echo "noctalia-greeter" ;;
+        dms)        echo "dms-greeter" ;;
+        sddm)       echo "sddm-x11 sddm sddm-themes" ;;
+        sysc-greet) echo "sysc-greet cagebreak socat" ;;
+    esac
+}
+
+## Menu text, kept apart from the code that runs sudo.
+greeter_label() {
+    case "$1" in
+        noctalia)   echo "Noctalia Greeter" ;;
+        dms)        echo "DMS Greeter" ;;
+        sddm)       echo "SDDM" ;;
+        sysc-greet) echo "sysc-greet" ;;
+        prune)      echo "Remove a greeter" ;;
+    esac
+}
+
+greeter_tagline() {
+    case "$1" in
+        noctalia)   echo "image default" ;;
+        dms)        echo "matches DankMaterialShell" ;;
+        sddm)       echo "fallback display manager" ;;
+        sysc-greet) echo "console TUI, survives a broken GUI" ;;
+        prune)      echo "no reboot needed" ;;
+    esac
+}
+
+greeter_desc() {
+    case "$1" in
+        noctalia)
+            echo "A session wrapper around a wlroots compositor bundled with the greeter, so greetd has a real session to hold. The theme follows the Noctalia shell."
+            ;;
+        dms)
+            echo "Starts its own Hyprland and writes that compositor config itself, so the login screen matches DankMaterialShell without anything hand-written."
+            ;;
+        sddm)
+            echo "The only option that is not greetd: the escape hatch when greetd itself is the problem. Pinned to the X11 greeter, because the Wayland one leaves the cursor frozen on some machines."
+            ;;
+        sysc-greet)
+            echo "A console TUI drawn on cagebreak. The one that still logs in when the graphical stack is broken, at the cost of a terminal emulator in the greeter session."
+            ;;
+        prune)
+            echo "Remove greeters you no longer use. The active one is never offered, so the next boot cannot end up on a missing login screen."
+            ;;
+    esac
+}
+
+greeter_starts() {
+    case "$1" in
+        sddm) echo "systemd · display-manager.service" ;;
+        *)    echo "greetd · /etc/greetd/config.toml" ;;
+    esac
+}
+
+## overlay = removable through rum, image = part of the image, missing = absent.
+package_state() {
+    local db=/var/lib/rakuos/rum-rpmdb
+
+    if [ -d "$db" ] && rpm --dbpath="$db" -q "$1" >/dev/null 2>&1; then
+        echo "overlay"
+    elif rpm -q "$1" >/dev/null 2>&1; then
+        echo "image"
+    else
+        echo "missing"
+    fi
+}
+
+human_size() {
+    LC_ALL=C awk -v b="$1" 'BEGIN {
+        if (b >= 1073741824) printf "%.1f GB", b / 1073741824
+        else if (b >= 1048576) printf "%.1f MB", b / 1048576
+        else printf "%.0f KB", b / 1024
+    }'
+}
+
+## Installed size of one greeter; empty when nothing is installed.
+greeter_size() {
+    local pkg bytes total=0 found=0
+
+    for pkg in $(greeter_packages "$1"); do
+        [ "$(package_state "$pkg")" = "missing" ] && continue
+
+        bytes=$(rpm -q --qf '%{SIZE}\n' "$pkg" 2>/dev/null | head -n 1)
+        [[ $bytes =~ ^[0-9]+$ ]] || bytes=$(rpm --dbpath=/var/lib/rakuos/rum-rpmdb -q --qf '%{SIZE}\n' "$pkg" 2>/dev/null | head -n 1)
+        [[ $bytes =~ ^[0-9]+$ ]] || continue
+
+        total=$((total + bytes))
+        found=1
+    done
+
+    [ "$found" -eq 1 ] && human_size "$total"
+}
+
+## Screenshot: user override first, then the one shipped in the image.
+greeter_image() {
+    local dir ext
+    for dir in "$HOME/.local/share/rakuos/greeter-preview" /usr/share/rakuos/greeter-preview; do
+        for ext in jpg png webp jpeg; do
+            [ -f "$dir/$1.$ext" ] && { echo "$dir/$1.$ext"; return 0; }
+        done
+    done
+    return 1
+}
+
+## Kitty images stick to cells and come back when fzf reopens the alt screen,
+## so every preview clears the previous one first (the prune pane draws none).
+clear_images() {
+    case "${TERM_PROGRAM:-}" in
+        ghostty|kitty|WezTerm) printf '%s' $'\e_Ga=d,d=A\e\\' ;;
+    esac
+}
+
+## Preview pane: read-only, fzf runs it on every cursor move.
+preview_greeter() {
+    local name="$1" active="$2"
+    clear_images
+    local width=${FZF_PREVIEW_COLUMNS:-52}
+    [ "$width" -ge 20 ] || width=52
+    local text=$((width - 2))
+    local lines=${FZF_PREVIEW_LINES:-24}
+    local state size img
+
+    printf '\033[1;38;5;183m%s\033[0m\n' "$(greeter_label "$name")"
+    printf '\033[38;5;245m%s\033[0m\n' "$(greeter_tagline "$name")"
+
+    if [ "$name" = "$active" ]; then
+        printf '\033[38;5;114m● active\033[0m\n'
+    elif [ "$name" = "prune" ]; then
+        printf '\033[38;5;214m● cleanup\033[0m\n'
+    fi
+    echo
+
+    ## Keep the image short so the text below stays visible.
+    if img=$(greeter_image "$name") && have chafa && [ "$text" -ge 28 ] && [ "$lines" -ge 16 ]; then
+        local rows=$((text * 9 / 32)) budget=$((lines - 12))
+        [ "$rows" -lt 6 ] && rows=6
+        if [ "$budget" -ge 6 ] && [ "$rows" -gt "$budget" ]; then
+            rows=$budget
+        fi
+        ## Kitty graphics: real image, not character art. Render to a file
+        ## first so a killed chafa cannot leave a half-sent image, then print
+        ## it and advance the cursor by its height.
+        case "${TERM_PROGRAM:-}" in
+            ghostty|kitty|WezTerm)
+                local tmp rc=1 i
+                if tmp=$(mktemp 2>/dev/null) &&
+                    chafa --format kitty --size "${text}x${rows}" "$img" >"$tmp" 2>/dev/null &&
+                    [ -s "$tmp" ]; then
+                    cat "$tmp"
+                    for ((i = 0; i < rows; i++)); do echo; done
+                    rc=0
+                fi
+                [ -n "${tmp:-}" ] && rm -f "$tmp"
+
+                if [ "$rc" -ne 0 ]; then
+                    chafa --format symbols --symbols all --optimize 9 \
+                        --size "${text}x${rows}" "$img" 2>/dev/null || true
+                fi
+                ;;
+            *)
+                chafa --format symbols --symbols all --optimize 9 \
+                    --size "${text}x${rows}" "$img" 2>/dev/null || true
+                ;;
+        esac
+        echo
+    fi
+
+    if [ "$name" = "prune" ]; then
+        printf '%s\n' "$(greeter_desc "$name")" | fold -s -w "$text"
+        echo
+
+        ## No screenshot here: what matters is what can be removed.
+        local cands=() cand cand_size
+        mapfile -t cands < <(removable_greeters)
+        if [ ${#cands[@]} -eq 0 ]; then
+            printf '\033[38;5;245mNothing to remove right now.\033[0m\n'
+        else
+            printf '\033[38;5;214mremovable now\033[0m\n'
+            for cand in "${cands[@]}"; do
+                cand_size=$(greeter_size "$cand")
+                printf '  %-18s %s\n' "$(greeter_label "$cand")" "$cand_size"
+            done
+        fi
+
+        echo
+        printf '\033[38;5;245mkept: %s (active)\033[0m\n' "$active"
+        printf '\033[38;5;245mSpace picks several · Enter confirms · Esc cancels\033[0m\n'
+        return 0
+    fi
+
+    printf '%s\n' "$(greeter_desc "$name")" | fold -s -w "$text"
+    echo
+
+    state=$(package_state "$(greeter_packages "$name" | awk '{print $1}')")
+    size=$(greeter_size "$name")
+    case "$state" in
+        image)   printf '\033[38;5;245mbuilt into the image%s\033[0m\n' "${size:+ · $size}" ;;
+        overlay) printf '\033[38;5;245minstalled%s\033[0m\n' "${size:+ · $size}" ;;
+        *)       printf '\033[38;5;245mnot installed · will be downloaded\033[0m\n' ;;
+    esac
+    printf '\033[38;5;245m%s\033[0m\n' "$(greeter_starts "$name")"
+    printf '\033[38;5;245mtakes effect on the next reboot\033[0m\n'
+}
+
+## Prune preview: which packages go away.
+preview_prune() {
+    local name="$1"
+    clear_images
+    local width=${FZF_PREVIEW_COLUMNS:-56} pkg state bytes total=0
+    [ "$width" -ge 20 ] || width=56
+    local text=$((width - 2))
+
+    printf '\033[1;38;5;183m%s\033[0m\n' "$(greeter_label "$name")"
+    printf '\033[38;5;245m%s\033[0m\n\n' "$(greeter_tagline "$name")"
+
+    printf '%s\n' "$(greeter_desc "$name")" | fold -s -w "$text"
+    echo
+
+    for pkg in $(greeter_packages "$name"); do
+        state=$(package_state "$pkg")
+        [ "$state" = "missing" ] && continue
+
+        bytes=$(rpm --dbpath=/var/lib/rakuos/rum-rpmdb -q --qf '%{SIZE}\n' "$pkg" 2>/dev/null | head -n 1)
+        [[ $bytes =~ ^[0-9]+$ ]] || bytes=$(rpm -q --qf '%{SIZE}\n' "$pkg" 2>/dev/null | head -n 1)
+        [[ $bytes =~ ^[0-9]+$ ]] || bytes=0
+        total=$((total + bytes))
+
+        printf '  %-18s %s\n' "$pkg" "$(human_size "$bytes")"
+    done
+
+    [ "$total" -gt 0 ] && printf '\n\033[38;5;245mTotal\033[0m  %s\n' "$(human_size "$total")"
+    echo
+    printf '\033[38;5;245mAlso removed: dependencies nothing else needs.\033[0m\n'
+    printf '\033[38;5;245mNo reboot needed.\033[0m\n'
+}
+
+## Greeters whose packages all live in the rum db. The active one is skipped.
+removable_greeters() {
+    local current name pkg all_removable
+
+    current=$(current_greeter)
+    for name in noctalia dms sddm sysc-greet; do
+        [ "$name" = "$current" ] && continue
+
+        all_removable=1
+        for pkg in $(greeter_packages "$name"); do
+            if ! removable_package "$pkg"; then
+                all_removable=0
+                break
+            fi
+        done
+        [ "$all_removable" -eq 1 ] && echo "$name"
+    done
+}
+
+## Only rum-tracked packages can be removed; image packages are refused.
+removable_package() {
+    local db=/var/lib/rakuos/rum-rpmdb
+
+    if [ -d "$db" ]; then
+        rpm --dbpath="$db" -q "$1" >/dev/null 2>&1
+    else
+        rpm -q "$1" >/dev/null 2>&1
+    fi
+}
+
+## --prune: drop greeters you no longer use. Never the active one, so the next
+## boot always has a login screen and no reboot is needed.
+prune() {
+    local current name pkg
+    current=$(current_greeter)
+
+    ## Drop the screenshot left by the previous menu.
+    clear_images
+
+    local candidates=()
+    mapfile -t candidates < <(removable_greeters)
+
+    if [ ${#candidates[@]} -eq 0 ]; then
+        echo "No other greeter is installed that can be removed."
+        echo "Active greeter: $current (never removed)."
+        return 0
+    fi
+
+    local picked="" preview_cmd
+    if have fzf && [ -t 2 ]; then
+        preview_cmd=$(printf '%q --preview-prune {1}' "$SELF")
+        picked=$(printf '%s\n' "${candidates[@]}" | env FZF_DEFAULT_OPTS= fzf \
+            --multi \
+            --layout=reverse \
+            --height=100% \
+            --border=rounded \
+            --border-label=' RakuOS · Remove a greeter ' \
+            --border-label-pos=3 \
+            --header="Active: $current (never removed)"$'\n'"Space select · Enter confirm · Esc cancel" \
+            --header-first \
+            --bind='space:toggle+down' \
+            --pointer='›' \
+            --marker='✓' \
+            --no-info \
+            --preview="$preview_cmd" \
+            --preview-window='right,58%,border-rounded,wrap' \
+            --color='border:#f38ba8,label:#f38ba8,pointer:#f5c2e7,header:#a6adc8,marker:#a6e3a1,bg+:#313244,info:#6c7086') ||
+            { echo "Cancelled."; return 1; }
+    elif have gum; then
+        picked=$(printf '%s\n' "${candidates[@]}" | gum choose --no-limit \
+            --header "Remove which greeters? (space = select, Enter = confirm, Esc = cancel)") ||
+            { echo "Cancelled."; return 1; }
+    else
+        local i reply
+        for i in "${!candidates[@]}"; do
+            printf '%d) %s\n' "$((i + 1))" "${candidates[$i]}" >&2
+        done
+        read -r -p "Numbers separated by spaces (empty to cancel): " reply
+        [ -n "$reply" ] || { echo "Cancelled."; return 1; }
+
+        for i in $reply; do
+            if ! [[ $i =~ ^[0-9]+$ ]] || [ "$i" -lt 1 ] || [ "$i" -gt "${#candidates[@]}" ]; then
+                die "no such choice: $i"
+            fi
+            picked+="${candidates[$((i - 1))]}"$'\n'
+        done
+    fi
+
+    [ -n "$picked" ] || { echo "Cancelled."; return 1; }
+
+    echo
+    echo "Will remove: $(echo "$picked" | tr '\n' ' ')"
+    confirm "Remove these greeters? $current stays installed." ||
+        { echo "Cancelled."; return 1; }
+
+    local rc=0
+    while IFS= read -r name; do
+        [ -n "$name" ] || continue
+
+        local -a installed=()
+        read -r -a pkgs <<< "$(greeter_packages "$name")"
+        for pkg in "${pkgs[@]}"; do
+            removable_package "$pkg" && installed+=("$pkg")
+        done
+        [ ${#installed[@]} -gt 0 ] || continue
+
+        if sudo rum remove -y "${installed[@]}"; then
+            # Only this script's own file needs removing; package config goes
+            # away with the package.
+            case "$name" in
+                sddm) sudo rm -f /etc/sddm.conf.d/50-rakuos-theme.conf ;;
+            esac
+            echo "Removed $name."
+        else
+            echo "Could not remove $name." >&2
+            rc=1
+        fi
+    done <<< "$picked"
+
+    echo
+    echo "Active greeter unchanged: $current. No reboot needed."
+    return $rc
+}
+
+finish() {
+    echo
+    if have gum; then
+        gum style --border rounded --border-foreground 114 \
+            --foreground 114 --padding "0 1" --margin "0 0" \
+            "Greeter changed" \
+            "Reboot to see the new login screen."
+    else
+        echo "Greeter changed, please reboot."
+    fi
+
+    if [ "$current" != "unknown" ]; then
+        echo "To undo: rakuos-hyprland greeter $current"
+    fi
+}
+
+menu() {
+    local current choice
+    current=$(current_greeter)
+
+    local options=(
+        "noctalia      Noctalia Greeter — image default, bundled wlroots compositor"
+        "dms           DMS Greeter — matches DankMaterialShell, runs its own Hyprland"
+        "sddm          SDDM — leaves greetd behind, X11 greeter (fallback DM)"
+        "sysc-greet    sysc-greet — console TUI on cagebreak, survives a broken GUI"
+        "prune         Remove a greeter you no longer use"
+    )
+
+    ## Two panes, full screen. fzf draws on /dev/tty, stdout stays clean.
+    if have fzf && [ -t 2 ]; then
+        local rows=() name preview_cmd
+        local mark
+        for name in noctalia dms sddm sysc-greet; do
+            if [ "$name" = "$current" ]; then
+                mark=$'\033[38;5;114m●\033[0m'
+            elif [ "$(package_state "$(greeter_packages "$name" | awk '{print $1}')")" = "missing" ]; then
+                mark=$'\033[38;5;240m·\033[0m'
+            else
+                mark=$'\033[38;5;245m○\033[0m'
+            fi
+            rows+=("$(printf '%s\t%s %s' "$name" "$mark" "$(greeter_label "$name")")")
+        done
+        rows+=("$(printf '%s\t%s %s' prune $'\033[38;5;245m·\033[0m' "$(greeter_label prune)")")
+
+        preview_cmd=$(printf '%q --preview {1} %q' "$SELF" "$current")
+
+        choice=$(
+            printf '%s\n' "${rows[@]}" | env FZF_DEFAULT_OPTS= fzf \
+                --ansi \
+                --delimiter=$'\t' \
+                --with-nth=2 \
+                --layout=reverse \
+                --height=100% \
+                --border=rounded \
+                --border-label=' RakuOS · Login screen ' \
+                --border-label-pos=3 \
+                --header="Active: $current"$'\n'"↑↓ move · Enter · Esc" \
+                --header-first \
+                --pointer='›' \
+                --no-info \
+                --preview="$preview_cmd" \
+                --preview-window='right,58%,border-rounded,wrap' \
+                --color='border:#cba6f7,label:#cba6f7,pointer:#f5c2e7,header:#a6adc8,hl:#f38ba8,hl+:#f38ba8,bg+:#313244,info:#6c7086'
+        ) || exit 1
+
+        ## fzf is gone: remove the last image so it does not sit over the shell.
+        printf '%s' $'\e_Ga=d,d=A\e\\' >/dev/tty 2>/dev/null || true
+
+        [ -n "$choice" ] || exit 1
+        echo "${choice%%$'\t'*}"
+        return
+    fi
+
+    if have gum; then
+        # stderr only: stdout is captured by the caller as the answer.
+        {
+            if [ "$current" != "unknown" ]; then
+                gum style --border rounded --padding "0 1" \
+                    --foreground 212 --border-foreground 212 \
+                    "RakuOS · Login screen" "Active: $current"
+            fi
+            echo
+        } >&2
+        choice=$(gum choose --header "Switch the login screen (Esc to cancel)" \
+            --cursor "› " --cursor.foreground 212 --height 9 "${options[@]}") || exit 1
+    else
+        local i
+        for i in "${!options[@]}"; do
+            printf '%d) %s\n' "$((i + 1))" "${options[$i]}" >&2
+        done
+        read -r -p "Number (1-${#options[@]}, empty to cancel): " i
+        [ -n "$i" ] || exit 1
+        # Without this, "abc" or "0" yields -1, and -1 picks the last item.
+        if ! [[ $i =~ ^[0-9]+$ ]] || [ "$i" -lt 1 ] || [ "$i" -gt "${#options[@]}" ]; then
+            die "no such choice: $i"
+        fi
+        choice="${options[$((i - 1))]}"
+    fi
+
+    echo "${choice%%[[:space:]]*}"
+}
+
+as_noctalia() {
+    install_greeter noctalia-greeter noctalia-greeter-session
+    set_command "/usr/bin/noctalia-greeter-session"
+    greetd_takes_over
+    finish
+}
+
+as_dms() {
+    install_greeter dms-greeter dms-greeter
+    set_command "/usr/bin/dms-greeter --command hyprland"
+    greetd_takes_over
+
+    # Best effort: the greeter works without a synced theme and only loses the
+    # user's wallpaper and colours. DMS_PRIVESC is set because the image ships
+    # sudo, doas and run0 all at once, and without it sync stops to ask which
+    # one to use.
+    if have dms-greeter; then
+        DMS_PRIVESC=sudo dms-greeter sync ||
+            echo "Theme sync failed; the greeter will use its defaults."
+    fi
+
+    finish
+}
+
+as_sddm() {
+    # Fedora splits sddm by display server: plain `sddm` pulls the Wayland
+    # variant (~20 MB), `sddm-x11` pulls Xorg and writes DisplayServer=x11.
+    # The Wayland greeter freezes the cursor on some machines, so X11 it is.
+    # sddm-themes is required too: the theme directory is empty without it.
+    install_greeter sddm-x11 /usr/lib/sddm/sddm.conf.d/x11.conf --no-recommends
+    install_greeter sddm-themes /usr/share/sddm/themes/maldives
+
+    # Fedora's sddm.conf points at sddm-breeze, which is not installed; without
+    # an explicit theme the Qt greeter falls back to the embedded one. Cursor
+    # is written only when that theme is present.
+    local conf=/etc/sddm.conf.d/50-rakuos-theme.conf cursor=""
+    for theme in Bibata-Modern-Classic Adwaita; do
+        if [ -d "/usr/share/icons/$theme/cursors" ]; then
+            cursor=$theme
+            break
+        fi
+    done
+
+    sudo install -d -m 755 /etc/sddm.conf.d
+    {
+        printf '[Theme]\nCurrent=maldives\n'
+        [ -n "$cursor" ] && printf 'CursorTheme=%s\n' "$cursor"
+    } | sudo tee "$conf" >/dev/null
+    grep -qx 'Current=maldives' "$conf" || die "could not write $conf"
+
+    sddm_takes_over
+    echo
+    if have gum; then
+        gum style --border rounded --border-foreground 114 \
+            --foreground 114 --padding "0 1" \
+            "SDDM (X11 greeter)" \
+            "Starts on the next boot; this session is left alone."
+    else
+        echo "SDDM (X11 greeter) starts on the next boot; this session is left alone."
+    fi
+    if [ "$current" != "unknown" ]; then
+        echo "To undo: rakuos-hyprland greeter $current"
+    fi
+}
+
+as_sysc_greet() {
+    # socat closes cagebreak after login; without it greetd waits forever.
+    # --no-recommends: cagebreak suggests xterm and X11 bits this never uses.
+    install_greeter sysc-greet sysc-greet --no-recommends
+    [ -f /etc/greetd/cagebreak-greeter-config ] ||
+        die "sysc-greet did not install /etc/greetd/cagebreak-greeter-config"
+    set_command "cagebreak -e -c /etc/greetd/cagebreak-greeter-config"
+    greetd_takes_over
+    finish
+}
+
+## Flags may come in any position: `greeter sddm -y` equals `greeter -y sddm`.
+target=""
+for arg in "$@"; do
+    case "$arg" in
+        ## Internal: called by fzf to fill the preview pane.
+        --preview)       preview_greeter "${2:-}" "${3:-}"; exit 0 ;;
+        --preview-prune) preview_prune "${2:-}"; exit 0 ;;
+        -y|--yes)       ASSUME_YES=1 ;;
+        --prune)        PRUNE=1 ;;
+        -h|--help|help) usage; exit 0 ;;
+        -*)             usage >&2; exit 2 ;;
+        *)              target="$arg" ;;
+    esac
+done
+
+if [ "$PRUNE" -eq 1 ]; then
+    prune
+    exit $?
+fi
+
+if [ -z "$target" ]; then
+    target=$(menu)
+fi
+
+## gum exits 0 with no output when Esc is pressed, so an empty answer is the
+## whole signal that the menu was dismissed.
+if [ -z "$target" ]; then
+    echo "Cancelled."
+    exit 1
+fi
+
+case "$target" in
+    noctalia|dms|sddm|sysc-greet|prune) ;;
+    *) usage >&2; exit 2 ;;
+esac
+
+if [ "$target" = "prune" ]; then
+    prune
+    exit $?
+fi
+
+current=$(current_greeter)
+if [ "$current" = "$target" ]; then
+    echo "$target is already the login screen."
+    exit 0
+fi
+
+if ! confirm "Switch the login screen from $current to $target?"; then
+    echo "Cancelled."
+    exit 1
+fi
+
+case "$target" in
+    noctalia)   as_noctalia ;;
+    dms)        as_dms ;;
+    sddm)       as_sddm ;;
+    sysc-greet) as_sysc_greet ;;
+esac

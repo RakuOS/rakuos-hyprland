@@ -218,3 +218,21 @@ hl.window_rule({
     float = true,
     size  = { "(monitor_w*0.5)", "(monitor_h*0.6)" },
 })
+
+-- Login screen picker (ghostty running rakuos-greeter-picker)
+hl.window_rule({
+    name  = "greeter-picker-float",
+    match = { title = "^(Login Screen)$" },
+    float = true,
+    center = true,
+    size  = { "(monitor_w*0.54)", "(monitor_h*0.76)" },
+})
+
+-- Shell picker
+hl.window_rule({
+    name  = "shell-picker-float",
+    match = { class = "^(org\\.rakuos\\.ShellPicker)$" },
+    float = true,
+    center = true,
+    size  = { "(monitor_w*0.54)", "(monitor_h*0.76)" },
+})

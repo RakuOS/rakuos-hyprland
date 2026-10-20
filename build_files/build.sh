@@ -51,6 +51,8 @@ rum install -y --skip-broken --skip-unavailable \
   eza \
   bat \
   fzf \
+  chafa \
+  gum \
   zoxide \
   fastfetch \
   starship \

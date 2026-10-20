@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Login Screen
+Comment=Choose which login screen (greeter) RakuOS Hyprland starts with
+Exec=ghostty --gtk-single-instance=false --title="Login Screen" --window-width=110 --window-height=26 --confirm-close-surface=false -e /usr/bin/rakuos-greeter-picker
+Icon=preferences-system-login
+Terminal=false
+Categories=System;
+Keywords=greeter;login;screen;sddm;greetd;noctalia;dms;sysc-greet;
+StartupNotify=false
+StartupWMClass=com.mitchellh.ghostty

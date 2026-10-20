@@ -1,0 +1,12 @@
+#!/bin/bash
+
+## Launcher for the desktop entry: runs the terminal UI and keeps the window
+## open so the result can be read. Args are passed through, so --prune works.
+
+/usr/bin/rakuos-hyprland greeter "$@"
+status=$?
+
+echo
+read -r -p "Press Enter to close this window... " _
+
+exit "$status"
