@@ -443,6 +443,29 @@ removable_package() {
     fi
 }
 
+## True when something outside the packages being removed still requires this
+## one, e.g. a shell that runs on quickshell while its greeter goes away.
+required_by_others() {
+    local pkg="$1" db=/var/lib/rakuos/rum-rpmdb req other skip
+    shift
+
+    while read -r req; do
+        [ -n "$req" ] || continue
+        skip=0
+        for other in "$@"; do
+            case "$req" in "$other"-*) skip=1 ;; esac
+        done
+        [ "$skip" -eq 0 ] && return 0
+    done < <(
+        rpm -q --whatrequires "$pkg" 2>/dev/null | grep -v '^no package requires'
+        if [ -d "$db" ]; then
+            rpm --dbpath="$db" -q --whatrequires "$pkg" 2>/dev/null |
+                grep -v '^no package requires'
+        fi
+    )
+    return 1
+}
+
 ## --prune: drop greeters you no longer use. Never the active one, so the next
 ## boot always has a login screen and no reboot is needed.
 prune() {
@@ -515,11 +538,18 @@ prune() {
         local -a installed=()
         read -r -a pkgs <<< "$(greeter_packages "$name")"
         for pkg in "${pkgs[@]}"; do
-            removable_package "$pkg" && installed+=("$pkg")
+            removable_package "$pkg" || continue
+            if required_by_others "$pkg" "${pkgs[@]}"; then
+                echo "Keeping $pkg: another package still needs it." >&2
+                continue
+            fi
+            installed+=("$pkg")
         done
         [ ${#installed[@]} -gt 0 ] || continue
 
-        if sudo rum remove -y "${installed[@]}"; then
+        # --no-autoremove: rum would otherwise sweep the runtime the greeter
+        # pulled in, e.g. quickshell while a shell is still using it.
+        if sudo rum remove -y --no-autoremove "${installed[@]}"; then
             # Only this script's own file needs removing; package config goes
             # away with the package.
             case "$name" in
@@ -647,6 +677,14 @@ as_noctalia() {
 }
 
 as_dms() {
+    # dms-greeter takes (quickshell or quickshell-git). Pin the git build so the
+    # DMS shell can share this runtime; the plain package conflicts with it.
+    if [ "$(package_state quickshell)" = missing ] &&
+       [ "$(package_state quickshell-git)" = missing ]; then
+        sudo rum install -y --refresh quickshell-git ||
+            die "quickshell-git could not be installed"
+    fi
+
     install_greeter dms-greeter dms-greeter
     set_command "/usr/bin/dms-greeter --command hyprland"
     greetd_takes_over
@@ -673,9 +711,10 @@ as_sddm() {
 
     # Fedora's sddm.conf points at sddm-breeze, which is not installed; without
     # an explicit theme the Qt greeter falls back to the embedded one. Cursor
-    # is written only when that theme is present.
+    # is written only when that theme is present: Ice is what the session's own
+    # appearance settings pick, Classic is the older default.
     local conf=/etc/sddm.conf.d/50-rakuos-theme.conf cursor=""
-    for theme in Bibata-Modern-Classic Adwaita; do
+    for theme in Bibata-Modern-Ice Bibata-Modern-Classic Adwaita; do
         if [ -d "/usr/share/icons/$theme/cursors" ]; then
             cursor=$theme
             break
@@ -686,6 +725,10 @@ as_sddm() {
     {
         printf '[Theme]\nCurrent=maldives\n'
         [ -n "$cursor" ] && printf 'CursorTheme=%s\n' "$cursor"
+        # SDDM defaults InputMethod to qtvirtualkeyboard, so the maldives theme
+        # opens a full on-screen keyboard on every machine, tablets or not, and
+        # it covers the password field. Empty means no input method at all.
+        printf '\n[General]\nInputMethod=\n'
     } | sudo tee "$conf" >/dev/null
     grep -qx 'Current=maldives' "$conf" || die "could not write $conf"
 
