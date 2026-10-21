@@ -19,18 +19,18 @@ OLDRUN="$HOME/.local/share/dotfiles-setup"
 
 # Copy the official RakuOS wallpaper set straight from the read-only image so
 # a later base-image update reaches existing users (and the skel stays small).
-# Noctalia's picker reads ~/Pictures/Wallpaper; -n never overwrites a user file.
+# Noctalia's picker reads ~/Pictures/Wallpapers; -n never overwrites a user file.
 populate_wallpapers() {
-    mkdir -p "$HOME/Pictures/Wallpaper"
+    mkdir -p "$HOME/Pictures/Wallpapers"
     for _wpdir in /usr/share/wallpapers/RakuOS-*/; do
         [ -d "$_wpdir" ] || continue
         _wpimg=$(find "$_wpdir" -path '*/contents/images/*.png' | head -n1)
         if [ -n "$_wpimg" ]; then
-            cp -n "$_wpimg" "$HOME/Pictures/Wallpaper/$(basename "$_wpdir").png"
+            cp -n "$_wpimg" "$HOME/Pictures/Wallpapers/$(basename "$_wpdir").png"
         fi
     done
     [ -f /usr/share/wallpapers/default.jpg ] && \
-        cp -n /usr/share/wallpapers/default.jpg "$HOME/Pictures/Wallpaper/default.jpg"
+        cp -n /usr/share/wallpapers/default.jpg "$HOME/Pictures/Wallpapers/default.jpg"
     unset _wpdir _wpimg
 }
 

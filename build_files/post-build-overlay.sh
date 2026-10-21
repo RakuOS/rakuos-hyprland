@@ -117,6 +117,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
 
 # hyprland packages (from rakuos-hyprland/build_files/build.sh)
   hyprland
+  gloview-git
   hyprland-guiutils
   uwsm
   noctalia
@@ -131,6 +132,7 @@ cat >> /usr/share/rakuos/protected-packages.txt << 'EOF'
   cava
   xdg-desktop-portal
   xdg-desktop-portal-hyprland
+  hyprland-preview-share-picker
   xdg-desktop-portal-gtk
   xdg-user-dirs-gtk
   xorg-x11-server-Xwayland

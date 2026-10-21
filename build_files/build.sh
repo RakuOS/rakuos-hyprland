@@ -27,6 +27,7 @@ rum config-manager --default --set-enabled $(cat /usr/share/rakuos/rpmfusion-def
 # (e.g. kde-partitionmanager) fails once Terra is disabled below.
 rum install -y --skip-broken --skip-unavailable \
   hyprland \
+  gloview-git \
   hyprland-guiutils \
   uwsm \
   xorg-x11-server-Xwayland \
@@ -40,6 +41,7 @@ rum install -y --skip-broken --skip-unavailable \
   noctalia-greeter \
   xdg-desktop-portal \
   xdg-desktop-portal-hyprland \
+  hyprland-preview-share-picker \
   xdg-desktop-portal-gtk \
   xdg-user-dirs-gtk \
   ghostty \

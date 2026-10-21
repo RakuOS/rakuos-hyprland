@@ -90,7 +90,7 @@ local modalMatches = {
     { title = "^(File Upload|Choose wallpaper|Library)(.*)$" },
     { class = "^(.*dialog.*)$" },
     { title = "^(.*dialog.*)$" },
-    { class = "^(hyprland-share-picker)$"},
+    { class = "^(ch\\.wysbd\\.hyprland-preview-share-picker)$"},
 }
 for _, m in ipairs(modalMatches) do hl.window_rule({ match = m, float = true }) end
 
@@ -128,14 +128,6 @@ hl.layer_rule({
     ignore_alpha = 0.5,
     blur = true,
     blur_popups = true,
-})
-
--- btop (diluncurkan via ghostty --title=btop -e btop)
-hl.window_rule({
-    name  = "btop-float",
-    match = { title = "^btop$" },
-    float = true,
-    size  = { 1200, 700 },
 })
 
 -- LocalSend — floating (multi appid)
