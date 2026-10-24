@@ -33,7 +33,7 @@ Usage: rakuos-hyprland greeter [option] [-y]
 
 Options:
   noctalia     Noctalia Greeter — image default, bundled wlroots compositor
-  dms          DMS Greeter — matches DankMaterialShell, runs its own Hyprland
+  dms          Dux Greeter — matches Dux Shell, runs its own Hyprland
   sddm         SDDM — leaves greetd behind, X11 greeter (fallback DM)
   sysc-greet   sysc-greet — console TUI on cagebreak, survives a broken GUI
   prune        remove a greeter you no longer use (the active one is never
@@ -187,7 +187,7 @@ greeter_packages() {
 greeter_label() {
     case "$1" in
         noctalia)   echo "Noctalia Greeter" ;;
-        dms)        echo "DMS Greeter" ;;
+        dms)        echo "Dux Greeter" ;;
         sddm)       echo "SDDM" ;;
         sysc-greet) echo "sysc-greet" ;;
         prune)      echo "Remove a greeter" ;;
@@ -197,7 +197,7 @@ greeter_label() {
 greeter_tagline() {
     case "$1" in
         noctalia)   echo "image default" ;;
-        dms)        echo "matches DankMaterialShell" ;;
+        dms)        echo "matches Dux Shell" ;;
         sddm)       echo "fallback display manager" ;;
         sysc-greet) echo "console TUI, survives a broken GUI" ;;
         prune)      echo "no reboot needed" ;;
@@ -210,7 +210,7 @@ greeter_desc() {
             echo "A session wrapper around a wlroots compositor bundled with the greeter, so greetd has a real session to hold. The theme follows the Noctalia shell."
             ;;
         dms)
-            echo "Starts its own Hyprland and writes that compositor config itself, so the login screen matches DankMaterialShell without anything hand-written."
+            echo "Starts its own Hyprland and writes that compositor config itself, so the login screen matches Dux Shell without anything hand-written."
             ;;
         sddm)
             echo "The only option that is not greetd: the escape hatch when greetd itself is the problem. Pinned to the X11 greeter, because the Wayland one leaves the cursor frozen on some machines."
@@ -589,7 +589,7 @@ menu() {
 
     local options=(
         "noctalia      Noctalia Greeter — image default, bundled wlroots compositor"
-        "dms           DMS Greeter — matches DankMaterialShell, runs its own Hyprland"
+        "dms           Dux Greeter — matches Dux Shell, runs its own Hyprland"
         "sddm          SDDM — leaves greetd behind, X11 greeter (fallback DM)"
         "sysc-greet    sysc-greet — console TUI on cagebreak, survives a broken GUI"
         "prune         Remove a greeter you no longer use"

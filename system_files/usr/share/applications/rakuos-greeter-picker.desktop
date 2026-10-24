@@ -6,6 +6,6 @@ Exec=ghostty --gtk-single-instance=false --title="Login Screen" --window-width=1
 Icon=preferences-system-login
 Terminal=false
 Categories=System;
-Keywords=greeter;login;screen;sddm;greetd;noctalia;dms;sysc-greet;
+Keywords=greeter;login;screen;sddm;greetd;noctalia;dms;dux;sysc-greet;
 StartupNotify=false
 StartupWMClass=com.mitchellh.ghostty

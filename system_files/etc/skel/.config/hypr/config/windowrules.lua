@@ -217,7 +217,7 @@ hl.window_rule({
     match = { title = "^(Login Screen)$" },
     float = true,
     center = true,
-    size  = { "(monitor_w*0.54)", "(monitor_h*0.76)" },
+    size  = { "(monitor_w*0.45)", "(monitor_h*0.70)" },
 })
 
 -- Shell picker
@@ -226,5 +226,5 @@ hl.window_rule({
     match = { class = "^(org\\.rakuos\\.ShellPicker)$" },
     float = true,
     center = true,
-    size  = { "(monitor_w*0.54)", "(monitor_h*0.76)" },
+    size  = { "(monitor_w*0.45 )", "(monitor_h*0.70)" },
 })
