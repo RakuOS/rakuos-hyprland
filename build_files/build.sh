@@ -19,6 +19,14 @@ if [ "${RAKUOS_STAGING:-0}" = "1" ]; then
     RAKUOS_SYSTEM_PKG="rakuos-system-staging-gtk"
 fi
 
+# And for the Software Center and the Welcome app.
+RAKUOS_SOFTWARE_PKG="rakuos-software-gtk"
+RAKUOS_WELCOME_PKG="rakuos-welcome-gtk"
+if [ "${RAKUOS_STAGING:-0}" = "1" ]; then
+    RAKUOS_SOFTWARE_PKG="rakuos-software-staging-gtk"
+    RAKUOS_WELCOME_PKG="rakuos-welcome-staging-gtk"
+fi
+
 # Terra ships disabled by default (third-party repos are opt-in), so enable
 # it here in case any packages below come from Terra; post-build.sh disables
 # it again before the image is finalized.
@@ -104,9 +112,9 @@ rum install -y --skip-broken --skip-unavailable \
   tesseract-langpack-ind \
   zbar \
   ${RAKUOS_RELEASE_PKG} \
-  rakuos-software-gtk \
+  ${RAKUOS_SOFTWARE_PKG} \
   ${RAKUOS_SYSTEM_PKG} \
-  rakuos-welcome-gtk \
+  ${RAKUOS_WELCOME_PKG} \
   rakuos-shell-picker \
 
 ## Kitty is replaced by ghostty, and wofi is used by neither Noctalia nor the
