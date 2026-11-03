@@ -85,7 +85,7 @@ gpu_poll_seconds = 2
 directory = "~/Pictures/Wallpapers"
 
     [wallpaper.default]
-    path = "/usr/share/backgrounds/rakuos/RakuOS-Fuji-2.png"
+    path = "/usr/share/backgrounds/rakuos/RakuOS-Chojiro.jpg"
 
 [theme]
 # dark, not light. This is the switch the rest of the image follows, and it used
