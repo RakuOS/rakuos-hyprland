@@ -1,0 +1,45 @@
+#!/bin/bash
+
+## RakuOS Hyprland helper: the greeter switcher (it cannot be changed from the
+## session it guards) and a shortcut to the shell picker.
+
+COMMAND="${1:-}"
+if [ $# -gt 0 ]; then
+    shift
+fi
+
+case "$COMMAND" in
+    greeter)
+        exec /usr/libexec/rakuos-hyprland-greeter "$@"
+        ;;
+    shell)
+        exec /usr/bin/rakuos-shell-picker "$@"
+        ;;
+    ""|help|--help|-h)
+        cat <<'EOF'
+RakuOS Hyprland helper
+
+Usage:
+  rakuos-hyprland <command> [options]
+
+Commands:
+  greeter [name]   switch the login screen (noctalia, dms, sddm, sysc-greet)
+  greeter --prune  remove greeters you no longer use (active one untouched)
+  shell            open the shell picker
+  help             this text
+
+Without a name, `greeter` opens a menu of the greeters this image knows how to
+configure. For noctalia, dms and sysc-greet the choice is written to
+/etc/greetd/config.toml; sddm is handled by systemd's display-manager alias.
+Either way it takes effect on the next reboot, never in the running session.
+
+The greeter is not tied to the shell picked with `shell`: themes match only when
+both are the same shell, so pick the greeter after the shell, not before.
+EOF
+        ;;
+    *)
+        echo "rakuos-hyprland: unknown command '$COMMAND'" >&2
+        echo "Try 'rakuos-hyprland help'." >&2
+        exit 2
+        ;;
+esac

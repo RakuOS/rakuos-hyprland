@@ -1,3 +1,13 @@
+local animation = {
+    name = "Default 1",
+    icon = "󰇄",
+    description = "Classic animation profile with vertical workspace transitions."
+}
+
+if not hl then
+    return animation
+end
+
 -- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
 
 -- Default beziers
@@ -15,6 +25,8 @@ hl.curve("rubber",         { type = "spring", mass = 1, stiffness = 200,  dampen
 -- Animations
 hl.animation({ leaf = "global",              enabled = true, speed = 3, bezier = "quick"                 })
 hl.animation({ leaf = "windows",             enabled = true, speed = 3, spring = "easy",  style = "slide" })
-hl.animation({ leaf = "workspaces",          enabled = true, speed = 5, bezier = "quick", style = "slide" })
+hl.animation({ leaf = "workspaces",          enabled = true, speed = 5, bezier = "quick", style = "slidevert" })
 hl.animation({ leaf = "specialWorkspaceIn",  enabled = true, speed = 2, bezier = "quick", style = "slide top"})
 hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 2, bezier = "quick", style = "slide bottom"})
+
+return animation

@@ -12,6 +12,21 @@ if [ "${RAKUOS_STAGING:-0}" = "1" ]; then
     RAKUOS_RELEASE_PKG="rakuos-release-hyprland-staging"
 fi
 
+# Same for RakuOS System: staging images install its -staging build (from
+# rakuos-system's staging branch), which provides the stable name.
+RAKUOS_SYSTEM_PKG="rakuos-system-gtk"
+if [ "${RAKUOS_STAGING:-0}" = "1" ]; then
+    RAKUOS_SYSTEM_PKG="rakuos-system-staging-gtk"
+fi
+
+# And for the Software Center and the Welcome app.
+RAKUOS_SOFTWARE_PKG="rakuos-software-gtk"
+RAKUOS_WELCOME_PKG="rakuos-welcome-gtk"
+if [ "${RAKUOS_STAGING:-0}" = "1" ]; then
+    RAKUOS_SOFTWARE_PKG="rakuos-software-staging-gtk"
+    RAKUOS_WELCOME_PKG="rakuos-welcome-staging-gtk"
+fi
+
 # Terra ships disabled by default (third-party repos are opt-in), so enable
 # it here in case any packages below come from Terra; post-build.sh disables
 # it again before the image is finalized.
@@ -27,6 +42,7 @@ rum config-manager --default --set-enabled $(cat /usr/share/rakuos/rpmfusion-def
 # (e.g. kde-partitionmanager) fails once Terra is disabled below.
 rum install -y --skip-broken --skip-unavailable \
   hyprland \
+  gloview-git \
   hyprland-guiutils \
   uwsm \
   xorg-x11-server-Xwayland \
@@ -40,6 +56,7 @@ rum install -y --skip-broken --skip-unavailable \
   noctalia-greeter \
   xdg-desktop-portal \
   xdg-desktop-portal-hyprland \
+  hyprland-preview-share-picker \
   xdg-desktop-portal-gtk \
   xdg-user-dirs-gtk \
   ghostty \
@@ -51,6 +68,8 @@ rum install -y --skip-broken --skip-unavailable \
   eza \
   bat \
   fzf \
+  chafa \
+  gum \
   zoxide \
   fastfetch \
   starship \
@@ -93,9 +112,9 @@ rum install -y --skip-broken --skip-unavailable \
   tesseract-langpack-ind \
   zbar \
   ${RAKUOS_RELEASE_PKG} \
-  rakuos-software-gtk \
-  rakuos-system-gtk \
-  rakuos-welcome-gtk \
+  ${RAKUOS_SOFTWARE_PKG} \
+  ${RAKUOS_SYSTEM_PKG} \
+  ${RAKUOS_WELCOME_PKG} \
   rakuos-shell-picker \
 
 ## Kitty is replaced by ghostty, and wofi is used by neither Noctalia nor the
