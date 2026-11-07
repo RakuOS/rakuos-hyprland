@@ -23,7 +23,7 @@ variables:
   IMAGE_REGISTRY_QUAY_V3: "quay.io/rakuos/rakuos-hyprland-v3"
   IMAGE_REGISTRY_QUAY_NVIDIA_V3: "quay.io/rakuos/rakuos-hyprland-nvidia-v3"
   # Legacy NVIDIA (580xx driver: Maxwell, Pascal, Volta) images, built from
-  # the rakuos-base-nvidia-legacy images with the same Containerfile.nvidia.
+  # the rakuos-base-nvidia-legacy images with the same Containerfile.
   IMAGE_REGISTRY_NVIDIA_LEGACY: "registry.gitlab.com/rakuos/images/rakuos-hyprland/nvidia-legacy"
   IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY: "quay.io/rakuos/rakuos-hyprland-nvidia-legacy"
   IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4: "quay.io/rakuos/rakuos-hyprland-nvidia-legacy-v4"
@@ -112,6 +112,7 @@ build-base:
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg RAKUOS_GPU="none" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -159,9 +160,11 @@ build-nvidia:
 
     - |
       buildah build \
-        --file Containerfile.nvidia \
+        --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="quay.io/rakuos/rakuos-base-nvidia" \
+        --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -297,6 +300,7 @@ build-base-v4:
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_V4}" \
+        --build-arg RAKUOS_GPU="none" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -348,6 +352,7 @@ build-base-v3:
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_V3}" \
+        --build-arg RAKUOS_GPU="none" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -395,10 +400,11 @@ build-nvidia-v4:
 
     - |
       buildah build \
-        --file Containerfile.nvidia \
+        --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_V4}" \
+        --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -446,10 +452,11 @@ build-nvidia-v3:
 
     - |
       buildah build \
-        --file Containerfile.nvidia \
+        --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_V3}" \
+        --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -497,10 +504,11 @@ build-nvidia-legacy:
 
     - |
       buildah build \
-        --file Containerfile.nvidia \
+        --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY}" \
+        --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -548,10 +556,11 @@ build-nvidia-legacy-v4:
 
     - |
       buildah build \
-        --file Containerfile.nvidia \
+        --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY_V4}" \
+        --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -599,10 +608,11 @@ build-nvidia-legacy-v3:
 
     - |
       buildah build \
-        --file Containerfile.nvidia \
+        --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
         --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
         --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY_V3}" \
+        --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
