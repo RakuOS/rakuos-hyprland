@@ -108,6 +108,9 @@ build-base:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -115,6 +118,14 @@ build-base:
         --build-arg RAKUOS_GPU="none" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg RAKUOS_GPU="none" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC}" \
@@ -159,6 +170,9 @@ build-nvidia:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -167,6 +181,15 @@ build-nvidia:
         --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="quay.io/rakuos/rakuos-base-nvidia" \
+        --build-arg RAKUOS_GPU="nvidia" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA)" \
@@ -295,6 +318,9 @@ build-base-v4:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_V4}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -303,6 +329,15 @@ build-base-v4:
         --build-arg RAKUOS_GPU="none" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_V4}" \
+        --build-arg RAKUOS_GPU="none" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC}" \
@@ -347,6 +382,9 @@ build-base-v3:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_V3}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -355,6 +393,15 @@ build-base-v3:
         --build-arg RAKUOS_GPU="none" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_V3}" \
+        --build-arg RAKUOS_GPU="none" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC}" \
@@ -399,6 +446,9 @@ build-nvidia-v4:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_V4}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -407,6 +457,15 @@ build-nvidia-v4:
         --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_V4}" \
+        --build-arg RAKUOS_GPU="nvidia" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA)" \
@@ -451,6 +510,9 @@ build-nvidia-v3:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_V3}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -459,6 +521,15 @@ build-nvidia-v3:
         --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_V3}" \
+        --build-arg RAKUOS_GPU="nvidia" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA)" \
@@ -503,6 +574,9 @@ build-nvidia-legacy:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -511,6 +585,15 @@ build-nvidia-legacy:
         --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY}" \
+        --build-arg RAKUOS_GPU="nvidia" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA legacy, 580xx)" \
@@ -555,6 +638,9 @@ build-nvidia-legacy-v4:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V4}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -563,6 +649,15 @@ build-nvidia-legacy-v4:
         --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY_V4}" \
+        --build-arg RAKUOS_GPU="nvidia" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA legacy, 580xx)" \
@@ -607,6 +702,9 @@ build-nvidia-legacy-v3:
     - export TEMP_TAG="${IMAGE_REGISTRY_QUAY_NVIDIA_LEGACY_V3}:ci-temp-${CI_PIPELINE_ID}"
 
     - |
+      # Two steps: chunkah writes out.ociarchive, then the final stage is
+      # built from it. In one build buildah could start the final stage
+      # before the archive exists ("archive file not found").
       buildah build \
         --file Containerfile \
         --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
@@ -615,6 +713,15 @@ build-nvidia-legacy-v3:
         --build-arg RAKUOS_GPU="nvidia" \
         --skip-unused-stages=false \
         -v "$(pwd)":/run/src --security-opt=label=disable \
+        --target chunkah \
+        .
+      buildah build \
+        --file Containerfile \
+        --build-arg BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
+        --build-arg RAKUOS_STAGING="${RAKUOS_STAGING}" \
+        --build-arg BASE_IMAGE_REPO="${BASE_IMAGE_REPO_NVIDIA_LEGACY_V3}" \
+        --build-arg RAKUOS_GPU="nvidia" \
+        --target final \
         --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         --label "org.opencontainers.image.version=${BRANCH_SLUG}.${DATE_TAG}" \
         --label "org.opencontainers.image.description=${IMAGE_DESC} (NVIDIA legacy, 580xx)" \
