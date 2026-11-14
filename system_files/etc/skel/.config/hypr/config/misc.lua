@@ -22,7 +22,7 @@ hl.config({
         middle_click_paste = false,
         enable_swallow = true,
         swallow_regex = "(ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)",
-        vrr = -1,
+        vrr = 0,
         focus_on_activate = true,
         allow_session_lock_restore = true,
         disable_scale_notification = true,
