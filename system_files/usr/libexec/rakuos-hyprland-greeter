@@ -4,7 +4,7 @@
 ##
 ##   noctalia    image default, a wrapped wlroots session (not a bare binary)
 ##   dms         dms-greeter, brings its own Hyprland and theme sync
-##   sddm        not greetd; X11 greeter, for when greetd is the problem
+##   sddm        not greetd; Wayland greeter (miriway), fallback DM
 ##   sysc-greet  console TUI on cagebreak, works without a GPU stack
 ##
 ## Nothing here starts a display manager: starting one from a live session
@@ -34,7 +34,7 @@ Usage: rakuos-hyprland greeter [option] [-y]
 Options:
   noctalia     Noctalia Greeter — image default, bundled wlroots compositor
   dms          Dux Greeter — matches Dux Shell, runs its own Hyprland
-  sddm         SDDM — leaves greetd behind, X11 greeter (fallback DM)
+  sddm         SDDM — leaves greetd behind, Wayland greeter (miriway)
   sysc-greet   sysc-greet — console TUI on cagebreak, survives a broken GUI
   prune        remove a greeter you no longer use (the active one is never
                offered, and nothing needs to be rebooted)
@@ -178,7 +178,7 @@ greeter_packages() {
     case "$1" in
         noctalia)   echo "noctalia-greeter" ;;
         dms)        echo "dms-greeter" ;;
-        sddm)       echo "sddm-x11 sddm sddm-themes" ;;
+        sddm)       echo "sddm-wayland-miriway sddm" ;;
         sysc-greet) echo "sysc-greet cagebreak socat" ;;
     esac
 }
@@ -213,7 +213,7 @@ greeter_desc() {
             echo "Starts its own Hyprland and writes that compositor config itself, so the login screen matches Dux Shell without anything hand-written."
             ;;
         sddm)
-            echo "The only option that is not greetd: the escape hatch when greetd itself is the problem. Pinned to the X11 greeter, because the Wayland one leaves the cursor frozen on some machines."
+            echo "The only option that is not greetd: the escape hatch when greetd itself is the problem. Uses the miriway Wayland greeter."
             ;;
         sysc-greet)
             echo "A console TUI drawn on cagebreak. The one that still logs in when the graphical stack is broken, at the cost of a terminal emulator in the greeter session."
@@ -590,7 +590,7 @@ menu() {
     local options=(
         "noctalia      Noctalia Greeter — image default, bundled wlroots compositor"
         "dms           Dux Greeter — matches Dux Shell, runs its own Hyprland"
-        "sddm          SDDM — leaves greetd behind, X11 greeter (fallback DM)"
+        "sddm          SDDM — Wayland greeter (miriway), fallback DM"
         "sysc-greet    sysc-greet — console TUI on cagebreak, survives a broken GUI"
         "prune         Remove a greeter you no longer use"
     )
@@ -706,8 +706,7 @@ as_sddm() {
     # variant (~20 MB), `sddm-x11` pulls Xorg and writes DisplayServer=x11.
     # The Wayland greeter freezes the cursor on some machines, so X11 it is.
     # sddm-themes is required too: the theme directory is empty without it.
-    install_greeter sddm-x11 /usr/lib/sddm/sddm.conf.d/x11.conf --no-recommends
-    install_greeter sddm-themes /usr/share/sddm/themes/maldives
+    install_greeter sddm-wayland-miriway /usr/lib/sddm/sddm.conf.d/miriway.conf
 
     # Fedora's sddm.conf points at sddm-breeze, which is not installed; without
     # an explicit theme the Qt greeter falls back to the embedded one. Cursor
@@ -721,26 +720,40 @@ as_sddm() {
         fi
     done
 
+    # Aligned with rakuos-bootstrap: SDDM uses its default theme; no maldives
+    # theme file is shipped/forced by this installer.
     sudo install -d -m 755 /etc/sddm.conf.d
-    {
-        printf '[Theme]\nCurrent=maldives\n'
-        [ -n "$cursor" ] && printf 'CursorTheme=%s\n' "$cursor"
-        # SDDM defaults InputMethod to qtvirtualkeyboard, so the maldives theme
-        # opens a full on-screen keyboard on every machine, tablets or not, and
-        # it covers the password field. Empty means no input method at all.
-        printf '\n[General]\nInputMethod=\n'
-    } | sudo tee "$conf" >/dev/null
-    grep -qx 'Current=maldives' "$conf" || die "could not write $conf"
+    sudo rm -f /etc/sddm.conf.d/50-rakuos-theme.conf 2>/dev/null || true
+
+    sudo tee /etc/sddm.conf.d/60-rakuos-sessions.conf >/dev/null <<'EOF'
+[Wayland]
+SessionDir=/usr/local/share/wayland-sessions,/usr/share/wayland-sessions
+SessionCommand=/usr/share/sddm/scripts/wayland-session
+
+[X11]
+SessionDir=/usr/local/share/xsessions,/usr/share/xsessions
+EOF
+
+    for pam in /etc/pam.d/sddm /etc/pam.d/sddm-autologin; do
+        [[ -f "$pam" ]] || continue
+        grep -q 'pam_oo7.so' "$pam" && continue
+        if [[ "$pam" == *autologin ]]; then
+            sudo sed -i '/^session    include     system-auth$/a -session    optional    pam_oo7.so auto_start' "$pam"
+        else
+            grep -q 'pam_oo7' "$pam" || sudo sed -i '/^auth       include     postlogin$/i -auth       optional    pam_oo7.so' "$pam"
+            grep -q 'pam_oo7.so auto_start' "$pam" || sudo sed -i '/^session    include     system-auth$/a -session    optional    pam_oo7.so auto_start' "$pam"
+        fi
+    done
 
     sddm_takes_over
     echo
     if have gum; then
         gum style --border rounded --border-foreground 114 \
             --foreground 114 --padding "0 1" \
-            "SDDM (X11 greeter)" \
+            "SDDM (Wayland/miriway greeter)" \
             "Starts on the next boot; this session is left alone."
     else
-        echo "SDDM (X11 greeter) starts on the next boot; this session is left alone."
+        echo "SDDM (Wayland/miriway greeter) starts on the next boot; this session is left alone."
     fi
     if [ "$current" != "unknown" ]; then
         echo "To undo: rakuos-hyprland greeter $current"
